@@ -1,18 +1,52 @@
+import { useState, useEffect } from 'react'
 import type { Recipe, Lang } from '../types'
 import { T } from '../translations'
+import { fetchDishImage } from '../api'
 import styles from './RecipeCard.module.css'
 
 interface Props {
   recipe: Recipe
   lang: Lang
   hasMain: boolean
+  cuisineLabel: string
 }
 
-export default function RecipeCard({ recipe, lang, hasMain }: Props) {
+export default function RecipeCard({ recipe, lang, hasMain, cuisineLabel }: Props) {
   const t = T[lang]
+  const [image, setImage] = useState<string | null>(null)
+  const [imgLoading, setImgLoading] = useState(true)
+
+  useEffect(() => {
+    setImgLoading(true)
+    setImage(null)
+    fetchDishImage(recipe.name, cuisineLabel || 'international')
+      .then(img => setImage(img))
+      .finally(() => setImgLoading(false))
+  }, [recipe.name, cuisineLabel])
 
   return (
     <div className={styles.card}>
+      {/* Image section */}
+      <div className={styles.imageBox}>
+        {imgLoading && (
+          <div className={styles.imageSkeleton}>
+            <div className={styles.skeletonShimmer} />
+            <span className={styles.skeletonText}>Generating image...</span>
+          </div>
+        )}
+        {image && (
+          <img
+            src={image}
+            alt={recipe.name}
+            className={styles.dishImage}
+            style={{ opacity: imgLoading ? 0 : 1 }}
+          />
+        )}
+        {!imgLoading && !image && (
+          <div className={styles.imageFallback}>🍽️</div>
+        )}
+      </div>
+
       <div className={styles.cardTop}>
         <div className={styles.cardTopGlow} />
         {hasMain && recipe.mainIngredient && (

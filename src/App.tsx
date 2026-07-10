@@ -23,6 +23,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
 
   const t = T[lang]
+  const isZh = lang === 'zh'
 
   const addIngredient = (val: string) => setIngredients(prev => [...prev, val])
 
@@ -66,7 +67,9 @@ export default function App() {
     }
   }
 
-  const isZh = lang === 'zh'
+  const cuisineLabel = selections.cuisine !== null
+    ? t.cuisine[selections.cuisine]
+    : 'international'
 
   return (
     <div className={styles.page}>
@@ -123,13 +126,18 @@ export default function App() {
           <>
             <div className={styles.results}>
               <p className={styles.resultsHeading}>{isZh ? '为你推荐' : 'Your recipes'}</p>
-              <p className={styles.resultsSubheading}>{isZh ? `根据你的 ${ingredients.length} 种食材生成` : `Generated from your ${ingredients.length} ingredients`}</p>
+              <p className={styles.resultsSubheading}>
+                {isZh
+                  ? `根据你的 ${ingredients.length} 种食材生成`
+                  : `Generated from your ${ingredients.length} ingredients`}
+              </p>
               {recipes.map((recipe, i) => (
                 <RecipeCard
                   key={i}
                   recipe={recipe}
                   lang={lang}
                   hasMain={mainIndex !== null}
+                  cuisineLabel={cuisineLabel}
                 />
               ))}
             </div>

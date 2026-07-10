@@ -158,3 +158,21 @@ Analyse and give shopping advice. Return ONLY valid JSON:
   const clean = raw.replace(/```json|```/g, '').trim()
   return JSON.parse(clean) as ShoppingAnalysis
 }
+
+export async function fetchDishImage(dishName: string, cuisine: string): Promise<string | null> {
+  try {
+    const prompt = `Professional food photography of ${dishName}, ${cuisine} cuisine, served on a beautiful plate, restaurant quality, soft natural lighting, shallow depth of field, top-down or 45-degree angle shot, highly appetizing, vibrant colors, 4K ultra detailed`
+
+    const res = await fetch('/api/generate-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+    })
+
+    if (!res.ok) return null
+    const data = await res.json()
+    return data.image ?? null
+  } catch {
+    return null
+  }
+}
