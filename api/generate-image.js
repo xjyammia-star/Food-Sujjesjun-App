@@ -1,4 +1,3 @@
-// Vercel serverless function — runs on the server, never exposes credentials to browser
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
@@ -10,43 +9,55 @@ export default async function handler(req, res) {
   try {
     const serviceAccount = JSON.parse(process.env.VITE_GOOGLE_SERVICE_ACCOUNT_JSON)
     const projectId = process.env.VITE_GOOGLE_CLOUD_PROJECT_ID
-
-    // Build JWT for Google OAuth
     const accessToken = await getAccessToken(serviceAccount)
 
-    // Call Imagen 3
-    const location = 'us-central1'
-    const model = 'imagen-3.0-generate-002'
-    const url = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${model}:predict`
+    // Try models and regions in order until one works
+    const attempts = [
+      { location: 'us-central1', model: 'imagen-3.0-generate-002' },
+      { location: 'us-central1', model: 'imagen-3.0-fast-generate-001' },
+      { location: 'us-central1', model: 'imagegeneration@006' },
+      { location: 'asia-southeast1', model: 'imagen-3.0-generate-002' },
+      { location: 'asia-southeast1', model: 'imagegeneration@006' },
+      { location: 'asia-east1', model: 'imagegeneration@006' },
+    ]
 
-    const imageRes = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        instances: [{ prompt }],
-        parameters: {
-          sampleCount: 1,
-          aspectRatio: '4:3',
-          safetyFilterLevel: 'block_few',
-          personGeneration: 'allow_adult',
+    let lastError = null
+
+    for (const { location, model } of attempts) {
+      const url = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${model}:predict`
+
+      const imageRes = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
         },
-      }),
-    })
+        body: JSON.stringify({
+          instances: [{ prompt }],
+          parameters: {
+            sampleCount: 1,
+            aspectRatio: '4:3',
+            safetyFilterLevel: 'block_few',
+            personGeneration: 'allow_adult',
+          },
+        }),
+      })
 
-    if (!imageRes.ok) {
-      const err = await imageRes.text()
-      console.error('Imagen error:', err)
-      return res.status(500).json({ error: 'Imagen API failed', detail: err })
+      if (imageRes.ok) {
+        const data = await imageRes.json()
+        const b64 = data.predictions?.[0]?.bytesBase64Encoded
+        if (b64) {
+          console.log(`Success with ${location}/${model}`)
+          return res.status(200).json({ image: `data:image/png;base64,${b64}` })
+        }
+      } else {
+        const errText = await imageRes.text()
+        console.error(`Failed ${location}/${model}:`, errText)
+        lastError = errText
+      }
     }
 
-    const data = await imageRes.json()
-    const b64 = data.predictions?.[0]?.bytesBase64Encoded
-    if (!b64) return res.status(500).json({ error: 'No image returned' })
-
-    return res.status(200).json({ image: `data:image/png;base64,${b64}` })
+    return res.status(500).json({ error: 'All Imagen attempts failed', detail: lastError })
 
   } catch (err) {
     console.error('generate-image error:', err)
@@ -70,7 +81,6 @@ async function getAccessToken(serviceAccount) {
   const b64Payload = btoa(JSON.stringify(payload)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
   const signingInput = `${b64Header}.${b64Payload}`
 
-  // Import private key
   const privateKeyPem = serviceAccount.private_key
   const pemContents = privateKeyPem
     .replace('-----BEGIN RSA PRIVATE KEY-----', '')
@@ -101,7 +111,6 @@ async function getAccessToken(serviceAccount) {
 
   const jwt = `${signingInput}.${b64Sig}`
 
-  // Exchange JWT for access token
   const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
