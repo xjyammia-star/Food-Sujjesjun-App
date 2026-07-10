@@ -1,0 +1,84 @@
+.panel {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-top: 1rem;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 12px;
+}
+
+.loading {
+  font-size: 14px;
+  color: #aaa;
+  text-align: center;
+  padding: 12px 0;
+}
+
+.group {
+  margin-bottom: 12px;
+}
+
+.groupLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #999;
+  margin-bottom: 6px;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pill {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.pillMust {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.pillNice {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.tip {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tipLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1d4ed8;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.tipText {
+  font-size: 13px;
+  color: #1e40af;
+  line-height: 1.5;
+}

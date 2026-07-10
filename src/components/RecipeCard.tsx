@@ -62,6 +62,38 @@ export default function RecipeCard({ recipe, lang, hasMain }: Props) {
           </div>
         </>
       )}
+
+      {recipe.nutrition && (
+        <>
+          <div className={styles.divider} />
+          <div className={styles.sectionTitle}>🥗 {t.nutritionTitle}</div>
+          <div className={styles.macroGrid}>
+            <div className={styles.macroItem}>
+              <span className={styles.macroValue}>{recipe.nutrition.protein}</span>
+              <span className={styles.macroLabel}>{t.protein}</span>
+            </div>
+            <div className={styles.macroItem}>
+              <span className={styles.macroValue}>{recipe.nutrition.carbs}</span>
+              <span className={styles.macroLabel}>{t.carbs}</span>
+            </div>
+            <div className={styles.macroItem}>
+              <span className={styles.macroValue}>{recipe.nutrition.fat}</span>
+              <span className={styles.macroLabel}>{t.fat}</span>
+            </div>
+            <div className={styles.macroItem}>
+              <span className={styles.macroValue}>{recipe.nutrition.fiber}</span>
+              <span className={styles.macroLabel}>{t.fiber}</span>
+            </div>
+          </div>
+          {recipe.nutrition.highlights && recipe.nutrition.highlights.length > 0 && (
+            <div className={styles.highlightsList}>
+              {recipe.nutrition.highlights.map((h, i) => (
+                <span key={i} className={styles.highlight}>✓ {h}</span>
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </div>
   )
 }

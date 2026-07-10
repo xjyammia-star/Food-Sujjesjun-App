@@ -6,6 +6,15 @@ export interface Substitution {
   reason: string
 }
 
+export interface Nutrition {
+  calories: number
+  protein: string
+  carbs: string
+  fat: string
+  fiber: string
+  highlights: string[]
+}
+
 export interface Recipe {
   name: string
   mainIngredient: string
@@ -16,6 +25,13 @@ export interface Recipe {
   steps: string[]
   substitutions: Substitution[]
   shopping: string[]
+  nutrition: Nutrition
+}
+
+export interface ShoppingAnalysis {
+  mustBuy: string[]
+  niceToHave: string[]
+  tip: string
 }
 
 export interface Selections {
