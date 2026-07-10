@@ -53,7 +53,6 @@ export default function App() {
       const result = await fetchRecipes(ingredients, mainIng, selections, staples, lang)
       setRecipes(result)
 
-      // Fire shopping analysis in parallel after recipes load
       setLoadingShop(true)
       fetchShoppingAnalysis(ingredients, result, lang)
         .then(s => setShopping(s))
@@ -61,30 +60,36 @@ export default function App() {
         .finally(() => setLoadingShop(false))
 
     } catch {
-      setError('Something went wrong. Please check your API key and try again.')
+      setError('Something went wrong. Check your API key in Vercel and redeploy.')
     } finally {
       setLoading(false)
     }
   }
 
+  const isZh = lang === 'zh'
+
   return (
     <div className={styles.page}>
-      <div className={styles.container}>
-
-        <div className={styles.langToggle}>
-          <button
-            className={`${styles.langBtn} ${lang === 'en' ? styles.langActive : ''}`}
-            onClick={() => setLang('en')}
-          >EN</button>
-          <button
-            className={`${styles.langBtn} ${lang === 'zh' ? styles.langActive : ''}`}
-            onClick={() => setLang('zh')}
-          >中文</button>
+      <div className={styles.hero}>
+        <div className={styles.heroGlow} />
+        <div className={styles.heroInner}>
+          <div className={styles.langToggle}>
+            <button
+              className={`${styles.langBtn} ${lang === 'en' ? styles.langActive : ''}`}
+              onClick={() => setLang('en')}
+            >EN</button>
+            <button
+              className={`${styles.langBtn} ${lang === 'zh' ? styles.langActive : ''}`}
+              onClick={() => setLang('zh')}
+            >中文</button>
+          </div>
+          <div className={styles.titleEyebrow}>{isZh ? '智能食谱生成器' : 'AI Recipe Generator'}</div>
+          <h1 className={styles.title}>{t.title}</h1>
+          <p className={styles.subtitle}>{t.sub}</p>
         </div>
+      </div>
 
-        <h1 className={styles.title}>{t.title}</h1>
-        <p className={styles.subtitle}>{t.sub}</p>
-
+      <div className={styles.container}>
         <IngredientInput
           lang={lang}
           ingredients={ingredients}
@@ -109,7 +114,7 @@ export default function App() {
           onClick={handleGenerate}
           disabled={loading}
         >
-          {loading ? t.loading : `${t.btnGenerate} ↗`}
+          {loading ? `⏳ ${t.loading}` : `✨ ${t.btnGenerate}`}
         </button>
 
         {error && <div className={styles.errorBox}>{error}</div>}
@@ -117,6 +122,8 @@ export default function App() {
         {recipes.length > 0 && (
           <>
             <div className={styles.results}>
+              <p className={styles.resultsHeading}>{isZh ? '为你推荐' : 'Your recipes'}</p>
+              <p className={styles.resultsSubheading}>{isZh ? `根据你的 ${ingredients.length} 种食材生成` : `Generated from your ${ingredients.length} ingredients`}</p>
               {recipes.map((recipe, i) => (
                 <RecipeCard
                   key={i}
@@ -133,7 +140,6 @@ export default function App() {
             />
           </>
         )}
-
       </div>
     </div>
   )

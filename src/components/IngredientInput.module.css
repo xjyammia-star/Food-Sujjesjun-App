@@ -1,60 +1,69 @@
 .section {
   background: #fff;
-  border: 1px solid #e5e5e5;
-  border-radius: 12px;
-  padding: 1rem 1.25rem;
+  border: 1px solid #e8e2d9;
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
   margin-bottom: 1rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 
 .label {
-  font-size: 11px;
-  color: #999;
+  font-size: 10px;
+  color: #a8a29e;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 500;
-  margin-bottom: 10px;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  margin-bottom: 12px;
 }
 
 .inputRow {
   display: flex;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .input {
   flex: 1;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  background: #fafafa;
-  color: #1a1a1a;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1.5px solid #e8e2d9;
+  background: #faf7f2;
+  color: #1c1917;
   font-size: 14px;
+  transition: border-color 0.15s;
+}
+
+.input::placeholder {
+  color: #c4b5ab;
 }
 
 .input:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: #ea580c;
+  background: #fff;
 }
 
 .addBtn {
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  background: transparent;
-  color: #1a1a1a;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1.5px solid #e8e2d9;
+  background: #1c1917;
+  color: #fff;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 500;
   white-space: nowrap;
+  transition: all 0.15s;
 }
 
 .addBtn:hover {
-  background: #f5f5f0;
+  background: #292524;
 }
 
 .tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 7px;
   min-height: 28px;
 }
 
@@ -62,25 +71,28 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 10px;
-  background: #eff6ff;
-  color: #1d4ed8;
+  padding: 5px 11px;
+  background: #fff7ed;
+  color: #9a3412;
   border-radius: 20px;
   font-size: 13px;
-  border: 1px solid #bfdbfe;
+  font-weight: 500;
+  border: 1.5px solid #fed7aa;
+  transition: all 0.15s;
 }
 
 .mainTag {
   background: #f0fdf4;
   color: #15803d;
-  border-color: #bbf7d0;
+  border-color: #86efac;
 }
 
 .star {
   cursor: pointer;
-  opacity: 0.4;
-  font-size: 12px;
+  opacity: 0.35;
+  font-size: 11px;
   line-height: 1;
+  transition: opacity 0.15s;
 }
 
 .star:hover, .starActive {
@@ -89,27 +101,37 @@
 
 .remove {
   cursor: pointer;
-  opacity: 0.5;
+  opacity: 0.4;
   font-size: 15px;
   line-height: 1;
+  transition: opacity 0.15s;
 }
 
 .remove:hover {
-  opacity: 1;
+  opacity: 0.9;
 }
 
 .hint {
-  font-size: 12px;
-  color: #aaa;
-  margin-top: 8px;
+  font-size: 11.5px;
+  color: #c4b5ab;
+  margin-top: 10px;
+  font-style: italic;
 }
 
 .staplesRow {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 10px;
+  margin-top: 12px;
   cursor: pointer;
   font-size: 13px;
-  color: #555;
+  color: #78716c;
+  padding-top: 12px;
+  border-top: 1px solid #f5ece4;
+}
+
+.staplesRow input[type="checkbox"] {
+  accent-color: #ea580c;
+  width: 15px;
+  height: 15px;
 }

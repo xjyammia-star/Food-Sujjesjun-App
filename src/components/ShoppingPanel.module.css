@@ -1,36 +1,51 @@
 .panel {
-  background: #fff;
-  border: 1px solid #e5e5e5;
-  border-radius: 12px;
-  padding: 1rem 1.25rem;
+  background: #1c1917;
+  border-radius: 18px;
+  padding: 1.5rem;
   margin-top: 1rem;
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.panelGlow {
+  position: absolute;
+  bottom: -40px;
+  left: -40px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(251,146,60,0.12) 0%, transparent 70%);
+  pointer-events: none;
 }
 
 .title {
-  font-size: 16px;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 18px;
   font-weight: 600;
-  color: #1a1a1a;
-  margin-bottom: 12px;
+  color: #fff;
+  margin-bottom: 1rem;
+  position: relative;
 }
 
 .loading {
-  font-size: 14px;
-  color: #aaa;
-  text-align: center;
-  padding: 12px 0;
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  padding: 8px 0;
+  position: relative;
 }
 
 .group {
-  margin-bottom: 12px;
+  margin-bottom: 14px;
+  position: relative;
 }
 
 .groupLabel {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: #999;
-  margin-bottom: 6px;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 8px;
 }
 
 .pills {
@@ -40,45 +55,46 @@
 }
 
 .pill {
-  padding: 4px 12px;
+  padding: 5px 13px;
   border-radius: 20px;
   font-size: 13px;
   font-weight: 500;
 }
 
 .pillMust {
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
+  background: rgba(239,68,68,0.15);
+  color: #fca5a5;
+  border: 1px solid rgba(239,68,68,0.3);
 }
 
 .pillNice {
-  background: #f0fdf4;
-  color: #15803d;
-  border: 1px solid #bbf7d0;
+  background: rgba(34,197,94,0.12);
+  color: #86efac;
+  border: 1px solid rgba(34,197,94,0.25);
 }
 
 .tip {
-  margin-top: 12px;
-  padding: 10px 12px;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  border-radius: 8px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: rgba(251,146,60,0.1);
+  border: 1px solid rgba(251,146,60,0.25);
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
+  position: relative;
 }
 
 .tipLabel {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
-  color: #1d4ed8;
+  color: #fb923c;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.1em;
 }
 
 .tipText {
-  font-size: 13px;
-  color: #1e40af;
-  line-height: 1.5;
+  font-size: 13.5px;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.6;
 }

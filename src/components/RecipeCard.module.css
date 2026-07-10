@@ -1,120 +1,159 @@
 .card {
   background: #fff;
-  border: 1px solid #e5e5e5;
-  border-radius: 12px;
-  padding: 1rem 1.25rem;
+  border: 1px solid #e8e2d9;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  transition: box-shadow 0.2s;
 }
 
-.header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
+.card:hover {
+  box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+}
+
+.cardTop {
+  background: linear-gradient(135deg, #1c1917, #3b1f0a);
+  padding: 1.25rem 1.5rem 1rem;
+  position: relative;
+}
+
+.cardTopGlow {
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  width: 130px;
+  height: 130px;
+  background: radial-gradient(circle, rgba(251,146,60,0.15) 0%, transparent 70%);
+  pointer-events: none;
 }
 
 .name {
-  font-size: 17px;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 20px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: #fff;
+  line-height: 1.3;
+  margin-bottom: 8px;
+  display: block;
 }
 
 .mainBadge {
   font-size: 11px;
-  padding: 3px 8px;
-  background: #f0fdf4;
-  color: #15803d;
+  padding: 3px 10px;
+  background: rgba(251,146,60,0.2);
+  color: #fb923c;
   border-radius: 20px;
-  border: 1px solid #bbf7d0;
+  border: 1px solid rgba(251,146,60,0.4);
   white-space: nowrap;
-  flex-shrink: 0;
+  display: inline-block;
+  margin-bottom: 10px;
+  font-weight: 500;
 }
 
 .meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap: 14px;
 }
 
 .metaItem {
-  font-size: 13px;
-  color: #888;
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.body {
+  padding: 1.25rem 1.5rem;
 }
 
 .divider {
   height: 1px;
-  background: #f0f0f0;
-  margin: 12px 0;
+  background: #f5ece4;
+  margin: 14px 0;
 }
 
 .sectionTitle {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
-  color: #1a1a1a;
-  margin: 10px 0 6px;
+  color: #a8a29e;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
 }
 
 .steps {
-  padding-left: 18px;
+  padding-left: 20px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 7px;
 }
 
 .steps li {
   font-size: 14px;
-  color: #555;
-  line-height: 1.6;
+  color: #44403c;
+  line-height: 1.65;
 }
 
 .subsList {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
 }
 
 .subItem {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: wrap;
   gap: 5px;
   font-size: 13px;
-  color: #555;
+  color: #57534e;
+  background: #faf7f2;
+  padding: 7px 10px;
+  border-radius: 8px;
 }
 
 .arrow {
-  color: #aaa;
+  color: #c4b5ab;
   font-size: 12px;
 }
 
 .subUse {
   color: #15803d;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .subReason {
-  color: #aaa;
+  color: #a8a29e;
   font-size: 12px;
 }
 
 .shoppingPills {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 4px;
+  gap: 6px;
+  margin-top: 2px;
 }
 
 .pill {
-  padding: 3px 10px;
-  background: #fffbeb;
+  padding: 4px 12px;
+  background: #fef3c7;
   color: #92400e;
   border: 1px solid #fde68a;
   border-radius: 20px;
   font-size: 12px;
+  font-weight: 500;
 }
 
 /* Nutrition */
+.nutritionBox {
+  background: #faf7f2;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-top: 4px;
+}
+
 .macroGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -123,43 +162,47 @@
 }
 
 .macroItem {
-  background: #f8f9ff;
-  border: 1px solid #e0e7ff;
-  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #e8e2d9;
+  border-radius: 10px;
   padding: 8px 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
 }
 
 .macroValue {
   font-size: 15px;
-  font-weight: 600;
-  color: #2563eb;
+  font-weight: 700;
+  color: #ea580c;
 }
 
 .macroLabel {
   font-size: 10px;
-  color: #888;
+  color: #a8a29e;
   text-align: center;
+  font-weight: 500;
 }
 
 .highlightsList {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin-top: 2px;
 }
 
 .highlight {
-  font-size: 12px;
+  font-size: 12.5px;
   color: #15803d;
-  background: #f0fdf4;
-  border-radius: 6px;
-  padding: 3px 8px;
-  display: inline-block;
-  width: fit-content;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.highlight::before {
+  content: '✓';
+  font-weight: 700;
 }
 
 @media (max-width: 400px) {
