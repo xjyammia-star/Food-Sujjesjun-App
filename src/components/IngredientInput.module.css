@@ -1,0 +1,106 @@
+.section {
+  margin-bottom: 1.25rem;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.tagWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  min-height: 44px;
+  align-items: center;
+  cursor: text;
+  transition: border-color 0.15s;
+}
+
+.tagWrap:focus-within {
+  border-color: var(--border-accent);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  background: var(--surface-1);
+  border: 0.5px solid var(--border);
+  color: var(--text-primary);
+}
+
+.tag.starred {
+  background: var(--bg-warning);
+  border-color: var(--border-warning);
+}
+
+.tagStar {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.5;
+  transition: opacity 0.1s;
+}
+
+.tagStar:hover,
+.starred .tagStar {
+  opacity: 1;
+}
+
+.tagRemove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 0;
+  transition: color 0.1s;
+}
+
+.tagRemove:hover {
+  color: var(--text-primary);
+}
+
+.bareInput {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  color: var(--text-primary);
+  min-width: 140px;
+  flex: 1;
+  font-family: var(--font-sans);
+}
+
+.bareInput::placeholder {
+  color: var(--text-muted);
+}
+
+.staplesRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.staplesRow label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
