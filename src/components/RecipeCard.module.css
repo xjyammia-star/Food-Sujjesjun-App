@@ -1,192 +1,115 @@
 .card {
-  background: var(--surface-2);
-  border: 0.5px solid var(--border);
+  background: #fff;
+  border: 1px solid #e5e5e5;
   border-radius: 12px;
-  overflow: hidden;
+  padding: 1rem 1.25rem;
 }
 
-.head {
-  padding: 1rem 1.25rem;
-  border-bottom: 0.5px solid var(--border);
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
 }
 
 .name {
   font-size: 17px;
-  font-weight: 500;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: #1a1a1a;
 }
 
 .mainBadge {
-  display: inline-block;
   font-size: 11px;
-  font-weight: 500;
-  padding: 3px 9px;
+  padding: 3px 8px;
+  background: #f0fdf4;
+  color: #15803d;
   border-radius: 20px;
-  background: var(--bg-warning);
-  border: 0.5px solid var(--border-warning);
-  margin-left: 8px;
-  vertical-align: middle;
-  color: var(--text-primary);
+  border: 1px solid #bbf7d0;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .meta {
   display: flex;
-  gap: 12px;
   flex-wrap: wrap;
-  margin-top: 8px;
-}
-
-.metaPill {
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-
-.body {
-  padding: 1rem 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.servingRow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.servingLabel {
-  font-size: 13px;
-  color: var(--text-secondary);
-  flex: 1;
-}
-
-.servingCtrl {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.srvBtn {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 0.5px solid var(--border-strong);
-  background: transparent;
-  font-size: 18px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-primary);
-  line-height: 1;
-  transition: background 0.1s;
-}
-
-.srvBtn:hover {
-  background: var(--surface-1);
-}
-
-.srvCount {
-  font-size: 15px;
-  font-weight: 500;
-  min-width: 24px;
-  text-align: center;
-  color: var(--text-primary);
-}
-
-.sectionHead {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text-muted);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  gap: 12px;
   margin-bottom: 10px;
 }
 
-.stepsList {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.step {
-  display: flex;
-  gap: 10px;
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-
-.stepNum {
-  flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--surface-1);
-  border: 0.5px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  margin-top: 3px;
-}
-
-.subList {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.subItem {
+.metaItem {
   font-size: 13px;
-  color: var(--text-secondary);
-  padding: 8px 10px;
-  background: var(--surface-1);
-  border-radius: var(--radius);
-  border: 0.5px solid var(--border);
-  line-height: 1.6;
+  color: #888;
 }
 
-.subArrow {
-  color: var(--text-accent);
-  font-weight: 500;
+.divider {
+  height: 1px;
+  background: #f0f0f0;
+  margin: 10px 0;
 }
 
-.shopList {
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 10px 0 6px;
+}
+
+.steps {
+  padding-left: 18px;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 5px;
 }
 
-.shopTag {
-  font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  background: var(--bg-danger);
-  color: var(--text-danger);
-  border: 0.5px solid var(--border-danger);
+.steps li {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.6;
 }
 
-.footer {
-  padding: 10px 1.25rem;
-  border-top: 0.5px solid var(--border);
+.subsList {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
-.shareBtn {
-  padding: 7px 14px;
-  border-radius: var(--radius);
-  border: 0.5px solid var(--border-strong);
-  background: transparent;
+.subItem {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
   font-size: 13px;
-  cursor: pointer;
-  color: var(--text-secondary);
-  font-family: inherit;
-  transition: all 0.1s;
+  color: #555;
 }
 
-.shareBtn:hover {
-  background: var(--surface-1);
-  color: var(--text-primary);
+.arrow {
+  color: #aaa;
+  font-size: 12px;
+}
+
+.subUse {
+  color: #15803d;
+  font-weight: 500;
+}
+
+.subReason {
+  color: #aaa;
+  font-size: 12px;
+}
+
+.shoppingPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 4px;
+}
+
+.pill {
+  padding: 3px 10px;
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
+  border-radius: 20px;
+  font-size: 12px;
 }

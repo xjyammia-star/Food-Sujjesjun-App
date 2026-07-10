@@ -2,12 +2,13 @@ export type Lang = 'en' | 'zh'
 
 export interface Substitution {
   missing: string
-  alternative: string
+  use: string
   reason: string
 }
 
 export interface Recipe {
   name: string
+  mainIngredient: string
   calories: number
   cookTime: string
   difficulty: string
@@ -15,23 +16,13 @@ export interface Recipe {
   steps: string[]
   substitutions: Substitution[]
   shopping: string[]
-  featuresMain: boolean
 }
 
-export interface HistoryEntry {
-  label: string
-  ingredients: string[]
-  starred: string | null
-  filters: FilterState
+export interface Selections {
+  cuisine: number | null
+  goal: number | null
+  time: number | null
+  meal: number | null
+  skill: number | null
+  diet: number | null
 }
-
-export interface FilterState {
-  cuisine: string | null
-  goal: string | null
-  time: string | null
-  meal: string | null
-  skill: string | null
-  diet: string | null
-}
-
-export type FilterKey = keyof FilterState
