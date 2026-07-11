@@ -6,110 +6,83 @@ export default async function handler(req, res) {
   const { prompt } = req.body
   if (!prompt) return res.status(400).json({ error: 'Missing prompt' })
 
+  // Support both variable names
+  const serviceAccountJson = process.env.GOOGLE_SERVICE_ACCOUNT || process.env.VITE_GOOGLE_SERVICE_ACCOUNT_JSON || ''
+  const projectId = process.env.VITE_GOOGLE_CLOUD_PROJECT_ID || ''
+
+  if (!serviceAccountJson || !projectId) {
+    console.error('[IMG] Missing config - serviceAccount:', !!serviceAccountJson, 'projectId:', !!projectId)
+    return res.status(500).json({ error: 'Server not configured' })
+  }
+
   try {
-    const serviceAccount = JSON.parse(process.env.VITE_GOOGLE_SERVICE_ACCOUNT_JSON)
-    const projectId = process.env.VITE_GOOGLE_CLOUD_PROJECT_ID
-    const accessToken = await getAccessToken(serviceAccount)
+    const accessToken = await getAccessToken(serviceAccountJson)
 
-    // Try models and regions in order until one works
-    const attempts = [
-      { location: 'us-central1', model: 'imagen-4.0-fast-generate-preview-06-05' },
-      { location: 'us-central1', model: 'imagen-4.0-generate-preview-06-05' },
-      { location: 'us-central1', model: 'imagen-3.0-generate-002' },
-      { location: 'asia-southeast1', model: 'imagen-4.0-fast-generate-preview-06-05' },
-      { location: 'asia-southeast1', model: 'imagen-3.0-generate-002' },
-      { location: 'asia-east1', model: 'imagen-4.0-fast-generate-preview-06-05' },
-    ]
+    const url = `https://us-central1-aiplatform.googleapis.com/v1/projects/${projectId}/locations/us-central1/publishers/google/models/imagen-4.0-fast-generate-001:predict`
 
-    let lastError = null
+    console.log('[IMG] Calling Imagen 4 Fast...')
 
-    for (const { location, model } of attempts) {
-      const url = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${model}:predict`
-
-      const imageRes = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
+    const imageRes = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        instances: [{ prompt }],
+        parameters: {
+          sampleCount: 1,
+          aspectRatio: '4:3',
+          safetyFilterLevel: 'block_some',
+          personGeneration: 'allow_adult',
         },
-        body: JSON.stringify({
-          instances: [{ prompt }],
-          parameters: {
-            sampleCount: 1,
-            aspectRatio: '4:3',
-            safetyFilterLevel: 'block_few',
-            personGeneration: 'allow_adult',
-          },
-        }),
-      })
+      }),
+    })
 
-      if (imageRes.ok) {
-        const data = await imageRes.json()
-        const b64 = data.predictions?.[0]?.bytesBase64Encoded
-        if (b64) {
-          console.log(`Success with ${location}/${model}`)
-          return res.status(200).json({ image: `data:image/png;base64,${b64}` })
-        }
-      } else {
-        const errText = await imageRes.text()
-        console.error(`Failed ${location}/${model}:`, errText)
-        lastError = errText
-      }
+    if (!imageRes.ok) {
+      const err = await imageRes.text()
+      console.error('[IMG] Imagen error:', imageRes.status, err.substring(0, 300))
+      return res.status(500).json({ error: 'Imagen API failed', detail: err })
     }
 
-    return res.status(500).json({ error: 'All Imagen attempts failed', detail: lastError })
+    const data = await imageRes.json()
+    const b64 = data.predictions?.[0]?.bytesBase64Encoded
+
+    if (!b64) {
+      console.warn('[IMG] No image returned:', JSON.stringify(data).substring(0, 200))
+      return res.status(500).json({ error: 'No image returned' })
+    }
+
+    console.log('[IMG] ✅ Success!')
+    return res.status(200).json({ image: `data:image/png;base64,${b64}` })
 
   } catch (err) {
-    console.error('generate-image error:', err)
+    console.error('[IMG] Error:', err.message)
     return res.status(500).json({ error: err.message })
   }
 }
 
-async function getAccessToken(serviceAccount) {
+async function getAccessToken(serviceAccountJson) {
+  const sa = JSON.parse(serviceAccountJson)
   const now = Math.floor(Date.now() / 1000)
 
   const header = { alg: 'RS256', typ: 'JWT' }
   const payload = {
-    iss: serviceAccount.client_email,
+    iss: sa.client_email,
     scope: 'https://www.googleapis.com/auth/cloud-platform',
     aud: 'https://oauth2.googleapis.com/token',
     iat: now,
     exp: now + 3600,
   }
 
-  const b64Header = btoa(JSON.stringify(header)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
-  const b64Payload = btoa(JSON.stringify(payload)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
-  const signingInput = `${b64Header}.${b64Payload}`
-
-  const privateKeyPem = serviceAccount.private_key
-  const pemContents = privateKeyPem
-    .replace('-----BEGIN RSA PRIVATE KEY-----', '')
-    .replace('-----END RSA PRIVATE KEY-----', '')
-    .replace('-----BEGIN PRIVATE KEY-----', '')
-    .replace('-----END PRIVATE KEY-----', '')
-    .replace(/\n/g, '')
-    .trim()
-
-  const binaryKey = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0))
-
-  const cryptoKey = await crypto.subtle.importKey(
-    'pkcs8',
-    binaryKey,
-    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
-    false,
-    ['sign']
-  )
-
-  const signature = await crypto.subtle.sign(
-    'RSASSA-PKCS1-v1_5',
-    cryptoKey,
-    new TextEncoder().encode(signingInput)
-  )
-
-  const b64Sig = btoa(String.fromCharCode(...new Uint8Array(signature)))
-    .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
-
-  const jwt = `${signingInput}.${b64Sig}`
+  // Use Node.js crypto (available in Vercel serverless, more reliable than Web Crypto)
+  const crypto = await import('crypto')
+  const encode = (obj) => Buffer.from(JSON.stringify(obj)).toString('base64url')
+  const headerPayload = `${encode(header)}.${encode(payload)}`
+  const sign = crypto.createSign('RSA-SHA256')
+  sign.update(headerPayload)
+  const signature = sign.sign(sa.private_key, 'base64url')
+  const jwt = `${headerPayload}.${signature}`
 
   const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
@@ -117,7 +90,8 @@ async function getAccessToken(serviceAccount) {
     body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`,
   })
 
+  if (!tokenRes.ok) throw new Error(`Token error: ${await tokenRes.text()}`)
   const tokenData = await tokenRes.json()
-  if (!tokenData.access_token) throw new Error('Failed to get access token: ' + JSON.stringify(tokenData))
+  if (!tokenData.access_token) throw new Error('No access token: ' + JSON.stringify(tokenData))
   return tokenData.access_token
 }
