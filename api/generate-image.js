@@ -13,12 +13,12 @@ export default async function handler(req, res) {
 
     // Try models and regions in order until one works
     const attempts = [
+      { location: 'us-central1', model: 'imagen-4.0-fast-generate-preview-06-05' },
+      { location: 'us-central1', model: 'imagen-4.0-generate-preview-06-05' },
       { location: 'us-central1', model: 'imagen-3.0-generate-002' },
-      { location: 'us-central1', model: 'imagen-3.0-fast-generate-001' },
-      { location: 'us-central1', model: 'imagegeneration@006' },
+      { location: 'asia-southeast1', model: 'imagen-4.0-fast-generate-preview-06-05' },
       { location: 'asia-southeast1', model: 'imagen-3.0-generate-002' },
-      { location: 'asia-southeast1', model: 'imagegeneration@006' },
-      { location: 'asia-east1', model: 'imagegeneration@006' },
+      { location: 'asia-east1', model: 'imagen-4.0-fast-generate-preview-06-05' },
     ]
 
     let lastError = null
