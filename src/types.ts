@@ -1,41 +1,57 @@
-// types.ts
+export type Lang = 'en' | 'zh'
 
-import type { Equipment } from './components/EquipmentPanel';
+export interface Substitution {
+  missing: string
+  use: string
+  reason: string
+}
 
 export interface Nutrition {
-  calories: number;
-  protein: string;
-  carbs: string;
-  fat: string;
-  fiber: string;
+  calories: number
+  protein: string
+  carbs: string
+  fat: string
+  fiber: string
+  highlights: string[]
 }
 
 export interface Recipe {
-  name: string;
-  description: string;
-  ingredients: string[];
-  steps: string[];
-  cookTime: string;
-  difficulty: string;
-  nutrition: Nutrition;
-  substitutions: string[];
-  shoppingList: string[];
+  name: string
+  mainIngredient: string
+  calories: number
+  cookTime: string
+  difficulty: string
+  servings: number
+  steps: string[]
+  substitutions: Substitution[]
+  shopping: string[]
+  nutrition: Nutrition
 }
 
 export interface ShoppingAnalysis {
-  mustBuy: string[];
-  niceToHave: string[];
-  dietTip: string;
+  mustBuy: string[]
+  niceToHave: string[]
+  tip: string
 }
 
 export interface Selections {
-  cuisine: string;
-  nutritionGoal: string;
-  cookTime: string;
-  mealType: string;
-  skillLevel: string;
-  dietary: string[];
-  pantryStaples: string[];
-  /** Equipment the user has available — recipes must not require anything absent from this set */
-  availableEquipment: Equipment[];
+  cuisine: number | null
+  goal: number | null
+  time: number | null
+  meal: number | null
+  skill: number | null
+  diet: number | null
 }
+
+// Equipment feature — added for cooking equipment toggle
+export type Equipment =
+  | 'oven'
+  | 'stovetop'
+  | 'microwave'
+  | 'airFryer'
+  | 'slowCooker'
+  | 'riceCooker'
+  | 'blender'
+  | 'grill'
+  | 'instantPot'
+  | 'toasterOven'
