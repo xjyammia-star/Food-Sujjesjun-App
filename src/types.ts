@@ -1,44 +1,41 @@
-export type Lang = 'en' | 'zh'
+// types.ts
 
-export interface Substitution {
-  missing: string
-  use: string
-  reason: string
-}
+import type { Equipment } from './components/EquipmentPanel';
 
 export interface Nutrition {
-  calories: number
-  protein: string
-  carbs: string
-  fat: string
-  fiber: string
-  highlights: string[]
+  calories: number;
+  protein: string;
+  carbs: string;
+  fat: string;
+  fiber: string;
 }
 
 export interface Recipe {
-  name: string
-  mainIngredient: string
-  calories: number
-  cookTime: string
-  difficulty: string
-  servings: number
-  steps: string[]
-  substitutions: Substitution[]
-  shopping: string[]
-  nutrition: Nutrition
+  name: string;
+  description: string;
+  ingredients: string[];
+  steps: string[];
+  cookTime: string;
+  difficulty: string;
+  nutrition: Nutrition;
+  substitutions: string[];
+  shoppingList: string[];
 }
 
 export interface ShoppingAnalysis {
-  mustBuy: string[]
-  niceToHave: string[]
-  tip: string
+  mustBuy: string[];
+  niceToHave: string[];
+  dietTip: string;
 }
 
 export interface Selections {
-  cuisine: number | null
-  goal: number | null
-  time: number | null
-  meal: number | null
-  skill: number | null
-  diet: number | null
+  cuisine: string;
+  nutritionGoal: string;
+  cookTime: string;
+  mealType: string;
+  skillLevel: string;
+  dietary: string[];
+  pantryStaples: string[];
+  /** Equipment the user has available — recipes must not require anything absent from this set */
+  availableEquipment: Equipment[];
 }
