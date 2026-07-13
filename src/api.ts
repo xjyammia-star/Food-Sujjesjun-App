@@ -51,13 +51,36 @@ function buildEquipmentClause(availableEquipment: Set<Equipment>, lang: Lang): s
     : `[EQUIPMENT RESTRICTION] The user does NOT have: ${missingNames.join(', ')}. Every recipe step must only use: ${availableNames.join(', ')}. Do not include any step requiring missing equipment.`
 }
 
+// Builds the ingredient strictness clause
+function buildIngredientClause(
+  ingredients: string[],
+  staples: boolean,
+  strict: boolean,
+  lang: Lang
+): string {
+  const stapleList = lang === 'zh'
+    ? '盐、食用油、糖、水、酱油'
+    : 'salt, oil, sugar, water, soy sauce'
+
+  if (strict) {
+    return lang === 'zh'
+      ? `【严格食材限制】用户需要立刻做饭，没有时间购物。食谱必须100%只使用用户提供的食材${staples ? `加上厨房常备（${stapleList}）` : ''}，绝对不能要求购买任何额外食材。"shopping"字段必须为空数组[]。`
+      : `[STRICT INGREDIENTS] The user needs to cook right now and cannot go shopping. Recipes MUST use ONLY the ingredients listed${staples ? ` plus pantry staples (${stapleList})` : ''}. Do not require any extra items to buy. The "shopping" field MUST be an empty array [].`
+  } else {
+    return lang === 'zh'
+      ? `【食材提示】如果食谱需要用户未列出的食材，请在"shopping"字段列出，并在"substitutions"字段为每个缺少的食材提供替代方案（用用户已有的食材替代），这样用户可以选择购买或直接替代。`
+      : `[INGREDIENT GUIDANCE] If a recipe needs ingredients the user hasn't listed, include them in the "shopping" field. For every such missing ingredient, also provide a substitution in the "substitutions" field showing what the user can use instead from what they already have, so they can cook immediately if they choose not to shop.`
+  }
+}
+
 export async function fetchRecipes(
   ingredients: string[],
   mainIngredient: string | null,
   selections: Selections,
   staples: boolean,
   lang: Lang,
-  availableEquipment?: Set<Equipment>
+  availableEquipment?: Set<Equipment>,
+  strictIngredients?: boolean
 ): Promise<Recipe[]> {
   const t = T[lang]
   const isZh = lang === 'zh'
@@ -69,10 +92,16 @@ export async function fetchRecipes(
   const skillLabel = selections.skill !== null ? t.skill[selections.skill] : null
   const dietLabel = selections.diet !== null ? t.diet[selections.diet] : null
 
-  // Build equipment clause only if equipment set was provided
   const equipmentClause = availableEquipment
     ? buildEquipmentClause(availableEquipment, lang)
     : ''
+
+  const ingredientClause = buildIngredientClause(
+    ingredients,
+    staples,
+    strictIngredients ?? false,
+    lang
+  )
 
   const prompt = isZh
     ? `你是一位专业营养师兼厨师。根据以下信息，推荐2-3道菜肴，并提供详细的营养分析。
@@ -86,6 +115,7 @@ ${timeLabel ? `烹饪时间：${timeLabel}` : ''}
 ${mealLabel ? `餐食类型：${mealLabel}` : ''}
 ${skillLabel ? `厨艺程度：${skillLabel}` : ''}
 ${dietLabel && dietLabel !== '无限制' ? `饮食要求：${dietLabel}` : ''}
+${ingredientClause}
 ${equipmentClause}
 
 请仅返回JSON（不要加任何说明文字），格式如下：
@@ -123,6 +153,7 @@ ${timeLabel ? `Cook time: ${timeLabel}` : ''}
 ${mealLabel ? `Meal type: ${mealLabel}` : ''}
 ${skillLabel ? `Skill level: ${skillLabel}` : ''}
 ${dietLabel && dietLabel !== 'None' ? `Dietary restriction: ${dietLabel}` : ''}
+${ingredientClause}
 ${equipmentClause}
 
 Return ONLY valid JSON (no explanation, no markdown), in this exact format:

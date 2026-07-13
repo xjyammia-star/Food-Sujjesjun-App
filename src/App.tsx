@@ -17,10 +17,12 @@ export default function App() {
   const [selections, setSelections] = useState<Selections>({
     cuisine: null, goal: null, time: null, meal: null, skill: null, diet: null,
   })
-  // Equipment: all ON by default (user has everything)
   const [availableEquipment, setAvailableEquipment] = useState<Set<Equipment>>(
     new Set(ALL_EQUIPMENT)
   )
+  // true = use only what the user has, false = extra ingredients OK
+  const [strictIngredients, setStrictIngredients] = useState(false)
+
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [shopping, setShopping] = useState<ShoppingAnalysis | null>(null)
   const [loading, setLoading] = useState(false)
@@ -56,7 +58,10 @@ export default function App() {
 
     try {
       const mainIng = mainIndex !== null ? ingredients[mainIndex] : null
-      const result = await fetchRecipes(ingredients, mainIng, selections, staples, lang, availableEquipment)
+      const result = await fetchRecipes(
+        ingredients, mainIng, selections, staples, lang,
+        availableEquipment, strictIngredients
+      )
       setRecipes(result)
 
       setLoadingShop(true)
@@ -108,6 +113,27 @@ export default function App() {
           onToggleMain={toggleMain}
           onStaplesChange={setStaples}
         />
+
+        {/* Strict ingredients toggle */}
+        <div className={styles.strictRow}>
+          <div className={styles.strictText}>
+            <span className={styles.strictLabel}>
+              {isZh ? '🛒 仅用现有食材' : '🛒 Use only what I have'}
+            </span>
+            <span className={styles.strictSub}>
+              {strictIngredients
+                ? (isZh ? '食谱只会用你列出的食材，不需要额外购买' : 'Recipes will only use ingredients you listed — no shopping needed')
+                : (isZh ? '食谱可能需要少量额外食材，并提供替代方案' : 'Recipes may need a few extras, with substitution alternatives provided')}
+            </span>
+          </div>
+          <button
+            className={`${styles.strictToggle} ${strictIngredients ? styles.strictOn : styles.strictOff}`}
+            onClick={() => setStrictIngredients(prev => !prev)}
+            aria-pressed={strictIngredients}
+          >
+            <span className={styles.strictThumb} />
+          </button>
+        </div>
 
         <FilterPanel
           lang={lang}
