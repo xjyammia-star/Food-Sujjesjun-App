@@ -27,7 +27,6 @@ async function callGemini(prompt: string): Promise<string> {
   return data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
 }
 
-// Builds the equipment restriction sentence injected into the AI prompt
 function buildEquipmentClause(availableEquipment: Set<Equipment>, lang: Lang): string {
   const missing = ALL_EQUIPMENT.filter(eq => !availableEquipment.has(eq))
 
@@ -51,7 +50,6 @@ function buildEquipmentClause(availableEquipment: Set<Equipment>, lang: Lang): s
     : `[EQUIPMENT RESTRICTION] The user does NOT have: ${missingNames.join(', ')}. Every recipe step must only use: ${availableNames.join(', ')}. Do not include any step requiring missing equipment.`
 }
 
-// Builds the ingredient strictness clause
 function buildIngredientClause(
   ingredients: string[],
   staples: boolean,
@@ -73,6 +71,14 @@ function buildIngredientClause(
   }
 }
 
+function buildTasteClause(tasteNotes: string, lang: Lang): string {
+  if (!tasteNotes.trim()) return ''
+
+  return lang === 'zh'
+    ? `【口味要求 - 必须严格遵守】用户的口味偏好：${tasteNotes}。请确保每道菜的所有步骤和用量都严格按照这些口味要求调整。`
+    : `[TASTE PREFERENCES — MUST FOLLOW STRICTLY] The user's taste preferences: ${tasteNotes}. Every recipe's steps and ingredient quantities must be adjusted to respect these preferences throughout.`
+}
+
 export async function fetchRecipes(
   ingredients: string[],
   mainIngredient: string | null,
@@ -80,7 +86,8 @@ export async function fetchRecipes(
   staples: boolean,
   lang: Lang,
   availableEquipment?: Set<Equipment>,
-  strictIngredients?: boolean
+  strictIngredients?: boolean,
+  tasteNotes?: string
 ): Promise<Recipe[]> {
   const t = T[lang]
   const isZh = lang === 'zh'
@@ -103,6 +110,8 @@ export async function fetchRecipes(
     lang
   )
 
+  const tasteClause = buildTasteClause(tasteNotes ?? '', lang)
+
   const prompt = isZh
     ? `你是一位专业营养师兼厨师。根据以下信息，推荐2-3道菜肴，并提供详细的营养分析。
 
@@ -115,6 +124,7 @@ ${timeLabel ? `烹饪时间：${timeLabel}` : ''}
 ${mealLabel ? `餐食类型：${mealLabel}` : ''}
 ${skillLabel ? `厨艺程度：${skillLabel}` : ''}
 ${dietLabel && dietLabel !== '无限制' ? `饮食要求：${dietLabel}` : ''}
+${tasteClause}
 ${ingredientClause}
 ${equipmentClause}
 
@@ -153,6 +163,7 @@ ${timeLabel ? `Cook time: ${timeLabel}` : ''}
 ${mealLabel ? `Meal type: ${mealLabel}` : ''}
 ${skillLabel ? `Skill level: ${skillLabel}` : ''}
 ${dietLabel && dietLabel !== 'None' ? `Dietary restriction: ${dietLabel}` : ''}
+${tasteClause}
 ${ingredientClause}
 ${equipmentClause}
 

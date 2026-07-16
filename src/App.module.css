@@ -232,3 +232,64 @@
 .strictOff .strictThumb {
   left: 3px;
 }
+
+/* ── Taste preferences box ─────────────────────────────────────────────────── */
+
+.tasteBox {
+  background: #ffffff;
+  border: 1px solid #e8e0d5;
+  border-radius: 16px;
+  padding: 1rem 1.25rem 1rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.tasteLabel {
+  display: block;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1c1917;
+  margin-bottom: 0.2rem;
+}
+
+.tasteSub {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  color: #78716c;
+  margin: 0 0 0.65rem 0;
+  line-height: 1.4;
+}
+
+.tasteInput {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1.5px solid #e8e0d5;
+  border-radius: 10px;
+  padding: 0.6rem 0.85rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  color: #1c1917;
+  background: #faf7f2;
+  resize: none;
+  outline: none;
+  transition: border-color 0.15s ease;
+  line-height: 1.5;
+}
+
+.tasteInput::placeholder {
+  color: #a8a29e;
+}
+
+.tasteInput:focus {
+  border-color: #ea580c;
+  background: #fff;
+}
+
+.tasteCount {
+  text-align: right;
+  font-size: 0.7rem;
+  color: #a8a29e;
+  margin-top: 0.3rem;
+  font-family: 'Inter', sans-serif;
+}

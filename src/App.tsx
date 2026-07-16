@@ -20,8 +20,8 @@ export default function App() {
   const [availableEquipment, setAvailableEquipment] = useState<Set<Equipment>>(
     new Set(ALL_EQUIPMENT)
   )
-  // true = use only what the user has, false = extra ingredients OK
   const [strictIngredients, setStrictIngredients] = useState(false)
+  const [tasteNotes, setTasteNotes] = useState('')
 
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [shopping, setShopping] = useState<ShoppingAnalysis | null>(null)
@@ -60,7 +60,7 @@ export default function App() {
       const mainIng = mainIndex !== null ? ingredients[mainIndex] : null
       const result = await fetchRecipes(
         ingredients, mainIng, selections, staples, lang,
-        availableEquipment, strictIngredients
+        availableEquipment, strictIngredients, tasteNotes.trim()
       )
       setRecipes(result)
 
@@ -148,6 +148,30 @@ export default function App() {
           onChange={setAvailableEquipment}
           lang={lang}
         />
+
+        {/* Taste preferences */}
+        <div className={styles.tasteBox}>
+          <label className={styles.tasteLabel} htmlFor="tasteNotes">
+            {isZh ? '🧂 口味偏好（选填）' : '🧂 Taste preferences (optional)'}
+          </label>
+          <p className={styles.tasteSub}>
+            {isZh
+              ? '告诉我你的口味，例如：少盐、不辣、少油、不加糖…'
+              : 'e.g. less salt, not spicy, low oil, no sugar, extra garlic…'}
+          </p>
+          <textarea
+            id="tasteNotes"
+            className={styles.tasteInput}
+            value={tasteNotes}
+            onChange={e => setTasteNotes(e.target.value)}
+            placeholder={isZh ? '在这里输入你的口味要求…' : 'Type your taste preferences here…'}
+            rows={2}
+            maxLength={200}
+          />
+          {tasteNotes.length > 0 && (
+            <div className={styles.tasteCount}>{tasteNotes.length}/200</div>
+          )}
+        </div>
 
         <button
           className={styles.generateBtn}
