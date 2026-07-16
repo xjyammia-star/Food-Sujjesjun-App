@@ -101,15 +101,19 @@
 }
 
 /* ── Inner elements ── */
-.emoji {
-  font-size: 1.5rem;
-  line-height: 1;
+.icon {
   display: block;
-  /* grayscale when OFF */
+  width: 40px;
+  height: 40px;
 }
 
-.off .emoji {
-  filter: grayscale(1);
+.icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.off .icon {
+  filter: grayscale(1) opacity(0.5);
 }
 
 .label {
