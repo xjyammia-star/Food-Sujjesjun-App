@@ -18,11 +18,11 @@ export default function RecipeCard({ recipe, lang, hasMain, cuisineLabel }: Prop
 
   useEffect(() => {
     setImgLoading(true)
-    setImage(null)
     fetchDishImage(recipe.name, cuisineLabel || 'international')
       .then(img => setImage(img))
       .finally(() => setImgLoading(false))
-  }, [recipe.name, cuisineLabel])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // empty array = run once on mount only; language changes must not re-trigger this
 
   return (
     <div className={styles.card}>
