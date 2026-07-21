@@ -127,6 +127,33 @@
   padding: 1.25rem 1.5rem;
 }
 
+.ingredientsList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2px 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+}
+
+.ingredientItem {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13.5px;
+  color: #44403c;
+  line-height: 1.45;
+}
+
+.ingredientDot {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ea580c;
+  opacity: 0.7;
+}
+
 .divider {
   height: 1px;
   background: #f5ece4;
@@ -269,5 +296,8 @@
   }
   .imageBox {
     height: 180px;
+  }
+  .ingredientsList {
+    grid-template-columns: 1fr;
   }
 }

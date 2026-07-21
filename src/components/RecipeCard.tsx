@@ -62,6 +62,21 @@ export default function RecipeCard({ recipe, lang, hasMain, cuisineLabel }: Prop
       </div>
 
       <div className={styles.body}>
+        {recipe.ingredients && recipe.ingredients.length > 0 && (
+          <>
+            <div className={styles.sectionTitle}>🧂 {t.ingredientsTitle ?? (lang === 'zh' ? '所需食材' : 'Ingredients')}</div>
+            <ul className={styles.ingredientsList}>
+              {recipe.ingredients.map((item, i) => (
+                <li key={i} className={styles.ingredientItem}>
+                  <span className={styles.ingredientDot} />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <div className={styles.divider} />
+          </>
+        )}
+
         <div className={styles.sectionTitle}>{t.steps}</div>
         <ol className={styles.steps}>
           {recipe.steps.map((step, i) => (
