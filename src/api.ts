@@ -238,6 +238,33 @@ Analyse and give shopping advice. Return ONLY valid JSON:
   return JSON.parse(clean) as ShoppingAnalysis
 }
 
+export async function translateRecipes(recipes: Recipe[], targetLang: Lang): Promise<Recipe[]> {
+  const isZh = targetLang === 'zh'
+
+  const prompt = isZh
+    ? `你是一位专业翻译兼厨师。请将以下食谱JSON从英文翻译成中文。
+规则：
+- 翻译所有文字字段：name、mainIngredient、cookTime、difficulty、ingredients数组、steps数组、substitutions对象中的missing/use/reason、shopping数组、nutrition.highlights数组
+- 保留所有数字字段原样：calories、servings、nutrition.calories/protein/carbs/fat/fiber
+- imagePrompt字段保持英文不变（用于图片生成）
+- 返回与输入完全相同的JSON结构，仅返回JSON，不要加任何说明
+
+${JSON.stringify({ recipes }, null, 2)}`
+    : `You are a professional translator and chef. Translate the following recipe JSON from Chinese to English.
+Rules:
+- Translate all text fields: name, mainIngredient, cookTime, difficulty, ingredients array, steps array, substitutions missing/use/reason fields, shopping array, nutrition.highlights array
+- Keep all numeric fields as-is: calories, servings, nutrition.calories/protein/carbs/fat/fiber
+- Keep the imagePrompt field in English unchanged (used for image generation)
+- Return the exact same JSON structure, return ONLY JSON with no explanation
+
+${JSON.stringify({ recipes }, null, 2)}`
+
+  const raw = await callGemini(prompt)
+  const clean = raw.replace(/```json|```/g, '').trim()
+  const parsed = JSON.parse(clean)
+  return parsed.recipes as Recipe[]
+}
+
 export async function fetchDishImage(dishName: string, cuisine: string, imagePrompt?: string): Promise<string | null> {
   try {
     const visualDescription = imagePrompt?.trim()

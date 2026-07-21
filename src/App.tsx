@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import type { Lang, Selections, Recipe, ShoppingAnalysis, Equipment } from './types'
 import { T } from './translations'
-import { fetchRecipes, fetchShoppingAnalysis } from './api'
+import { fetchRecipes, fetchShoppingAnalysis, translateRecipes } from './api'
 import IngredientInput from './components/IngredientInput'
 import FilterPanel from './components/FilterPanel'
 import EquipmentPanel, { ALL_EQUIPMENT } from './components/EquipmentPanel'
@@ -29,7 +29,7 @@ export default function App() {
   const [loadingShop, setLoadingShop] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Re-fetch recipes in new language when user switches, but only if recipes already exist
+  // Translate existing recipes when language switches — don't regenerate from scratch
   const isFirstRender = useRef(true)
   useEffect(() => {
     if (isFirstRender.current) {
@@ -38,16 +38,12 @@ export default function App() {
     }
     if (recipes.length === 0) return
 
-    const mainIng = mainIndex !== null ? ingredients[mainIndex] : null
     setLoading(true)
-    fetchRecipes(
-      ingredients, mainIng, selections, staples, lang,
-      availableEquipment, strictIngredients, tasteNotes.trim()
-    )
-      .then(result => {
-        setRecipes(result)
+    translateRecipes(recipes, lang)
+      .then(translated => {
+        setRecipes(translated)
         setLoadingShop(true)
-        fetchShoppingAnalysis(ingredients, result, lang)
+        fetchShoppingAnalysis(ingredients, translated, lang)
           .then(s => setShopping(s))
           .catch(() => setShopping(null))
           .finally(() => setLoadingShop(false))
