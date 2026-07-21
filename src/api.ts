@@ -236,7 +236,7 @@ Analyse and give shopping advice. Return ONLY valid JSON:
 
 export async function fetchDishImage(dishName: string, cuisine: string): Promise<string | null> {
   try {
-    const prompt = `Professional food photography of ${dishName}, ${cuisine} cuisine, served on a beautiful plate, restaurant quality, soft natural lighting, shallow depth of field, top-down or 45-degree angle shot, highly appetizing, vibrant colors, 4K ultra detailed`
+    const prompt = `Close-up food photography of ${dishName} dish, ${cuisine} cuisine. The entire frame is filled with the food itself on a ceramic plate. No people, no hands, no dining table, no restaurant background, no human figures. Macro food shot, overhead or 45-degree angle, soft natural side lighting, shallow depth of field focused on the food, steaming hot appearance, vivid and appetizing colors, garnished beautifully, 4K ultra detailed food photography`
 
     const res = await fetch('/api/generate-image', {
       method: 'POST',
