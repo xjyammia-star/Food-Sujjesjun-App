@@ -139,6 +139,7 @@ ${equipmentClause}
       "difficulty": "简单/中等/高级",
       "servings": 2,
       "ingredients": ["食材1及用量，如 '大蒜 3瓣'", "食材2及用量，如 '猪排骨 500g'"],
+      "imagePrompt": "A one-sentence English visual description of exactly what this dish looks like when served, e.g. 'A rich Chinese broth-based soup in a clay pot, packed with abalone, sea cucumber, quail eggs and shiitake mushrooms'",
       "steps": ["步骤1", "步骤2"],
       "substitutions": [{"missing": "缺少食材", "use": "替代品", "reason": "原因"}],
       "shopping": ["还需购买的食材"],
@@ -179,6 +180,7 @@ Return ONLY valid JSON (no explanation, no markdown), in this exact format:
       "difficulty": "Easy",
       "servings": 2,
       "ingredients": ["ingredient 1 with quantity e.g. '3 cloves garlic'", "ingredient 2 with quantity e.g. '500g pork ribs'"],
+      "imagePrompt": "A one-sentence English visual description of exactly what this finished dish looks like when plated and served, describing colour, texture, vessel and key visible ingredients",
       "steps": ["Step 1", "Step 2"],
       "substitutions": [{"missing": "ingredient", "use": "alternative", "reason": "why it works"}],
       "shopping": ["extra items needed"],
@@ -236,9 +238,12 @@ Analyse and give shopping advice. Return ONLY valid JSON:
   return JSON.parse(clean) as ShoppingAnalysis
 }
 
-export async function fetchDishImage(dishName: string, cuisine: string): Promise<string | null> {
+export async function fetchDishImage(dishName: string, cuisine: string, imagePrompt?: string): Promise<string | null> {
   try {
-    const prompt = `Close-up food photography of ${dishName} dish, ${cuisine} cuisine. The entire frame is filled with the food itself on a ceramic plate. No people, no hands, no dining table, no restaurant background, no human figures. Macro food shot, overhead or 45-degree angle, soft natural side lighting, shallow depth of field focused on the food, steaming hot appearance, vivid and appetizing colors, garnished beautifully, 4K ultra detailed food photography`
+    const visualDescription = imagePrompt?.trim()
+      ? imagePrompt.trim()
+      : `${dishName}, ${cuisine} cuisine dish`
+    const prompt = `Close-up food photography. ${visualDescription}. The entire frame is filled with the food itself. No people, no hands, no dining table, no restaurant background, no human figures. Overhead or 45-degree angle shot, soft natural side lighting, shallow depth of field focused on the food, steaming hot appearance, vivid and appetizing colors, garnished beautifully, 4K ultra detailed food photography`
 
     const res = await fetch('/api/generate-image', {
       method: 'POST',

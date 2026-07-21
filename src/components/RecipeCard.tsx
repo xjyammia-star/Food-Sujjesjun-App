@@ -18,7 +18,7 @@ export default function RecipeCard({ recipe, lang, hasMain, cuisineLabel }: Prop
 
   useEffect(() => {
     setImgLoading(true)
-    fetchDishImage(recipe.name, cuisineLabel || 'international')
+    fetchDishImage(recipe.name, cuisineLabel || 'international', recipe.imagePrompt)
       .then(img => setImage(img))
       .finally(() => setImgLoading(false))
   // eslint-disable-next-line react-hooks/exhaustive-deps

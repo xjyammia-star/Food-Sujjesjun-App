@@ -22,6 +22,7 @@ export interface Recipe {
   cookTime: string
   difficulty: string
   servings: number
+  imagePrompt?: string
   ingredients: string[]
   steps: string[]
   substitutions: Substitution[]
