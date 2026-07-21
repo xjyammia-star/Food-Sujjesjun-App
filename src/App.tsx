@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { Lang, Selections, Recipe, ShoppingAnalysis, Equipment } from './types'
 import { T } from './translations'
 import { fetchRecipes, fetchShoppingAnalysis } from './api'
@@ -28,6 +28,34 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [loadingShop, setLoadingShop] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Re-fetch recipes in new language when user switches, but only if recipes already exist
+  const isFirstRender = useRef(true)
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    if (recipes.length === 0) return
+
+    const mainIng = mainIndex !== null ? ingredients[mainIndex] : null
+    setLoading(true)
+    fetchRecipes(
+      ingredients, mainIng, selections, staples, lang,
+      availableEquipment, strictIngredients, tasteNotes.trim()
+    )
+      .then(result => {
+        setRecipes(result)
+        setLoadingShop(true)
+        fetchShoppingAnalysis(ingredients, result, lang)
+          .then(s => setShopping(s))
+          .catch(() => setShopping(null))
+          .finally(() => setLoadingShop(false))
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang])
 
   const t = T[lang]
   const isZh = lang === 'zh'
