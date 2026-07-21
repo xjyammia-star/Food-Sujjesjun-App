@@ -223,6 +223,7 @@ export default function App() {
                   lang={lang}
                   hasMain={mainIndex !== null}
                   cuisineLabel={cuisineLabel}
+                  mustBuy={shopping?.mustBuy ?? []}
                 />
               ))}
             </div>

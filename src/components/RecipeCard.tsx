@@ -9,12 +9,22 @@ interface Props {
   lang: Lang
   hasMain: boolean
   cuisineLabel: string
+  mustBuy: string[]
 }
 
-export default function RecipeCard({ recipe, lang, hasMain, cuisineLabel }: Props) {
+export default function RecipeCard({ recipe, lang, hasMain, cuisineLabel, mustBuy }: Props) {
   const t = T[lang]
   const [image, setImage] = useState<string | null>(null)
   const [imgLoading, setImgLoading] = useState(true)
+
+  // Normalise for fuzzy matching — lowercase, strip punctuation
+  const normalisedMustBuy = mustBuy.map(s => s.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]/g, ''))
+
+  function isMustBuy(ingredient: string): boolean {
+    if (normalisedMustBuy.length === 0) return false
+    const normIng = ingredient.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]/g, '')
+    return normalisedMustBuy.some(m => normIng.includes(m) || m.includes(normIng))
+  }
 
   useEffect(() => {
     setImgLoading(true)
@@ -67,8 +77,10 @@ export default function RecipeCard({ recipe, lang, hasMain, cuisineLabel }: Prop
             <div className={styles.sectionTitle}>🧂 {lang === 'zh' ? '所需食材' : 'Ingredients'}</div>
             <ul className={styles.ingredientsList}>
               {recipe.ingredients.map((item, i) => (
-                <li key={i} className={styles.ingredientItem}>
-                  <span className={styles.ingredientDot} />
+                <li key={i} className={`${styles.ingredientItem} ${isMustBuy(item) ? styles.ingredientMustBuy : ''}`}>
+                  {isMustBuy(item)
+                    ? <span className={styles.ingredientCartIcon}>🛒</span>
+                    : <span className={styles.ingredientDot} />}
                   {item}
                 </li>
               ))}

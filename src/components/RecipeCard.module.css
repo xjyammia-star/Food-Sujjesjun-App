@@ -145,6 +145,17 @@
   line-height: 1.45;
 }
 
+.ingredientMustBuy {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.ingredientCartIcon {
+  font-size: 13px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
 .ingredientDot {
   flex-shrink: 0;
   width: 7px;

@@ -24,17 +24,6 @@ export default function ShoppingPanel({ analysis, loading, lang }: Props) {
 
       {analysis && (
         <>
-          {analysis.mustBuy.length > 0 && (
-            <div className={styles.group}>
-              <div className={styles.groupLabel}>{t.mustBuy}</div>
-              <div className={styles.pills}>
-                {analysis.mustBuy.map((item, i) => (
-                  <span key={i} className={`${styles.pill} ${styles.pillMust}`}>{item}</span>
-                ))}
-              </div>
-            </div>
-          )}
-
           {analysis.niceToHave.length > 0 && (
             <div className={styles.group}>
               <div className={styles.groupLabel}>{t.niceToHave}</div>
