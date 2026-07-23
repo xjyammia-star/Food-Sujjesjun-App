@@ -76,6 +76,31 @@
   position: relative;
 }
 
+.heartBtn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+  transition: transform 0.15s;
+}
+
+.heartBtn:hover {
+  transform: scale(1.2);
+}
+
+.heartOn {
+  color: #f87171;
+}
+
+.heartOff {
+  color: rgba(255,255,255,0.3);
+}
+
 .cardTopGlow {
   position: absolute;
   top: -30px;

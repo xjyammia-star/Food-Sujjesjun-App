@@ -10,9 +10,11 @@ interface Props {
   hasMain: boolean
   cuisineLabel: string
   mustBuy: string[]
+  isFavourite: boolean
+  onToggleFavourite: () => void
 }
 
-export default function RecipeCard({ recipe, lang, hasMain, cuisineLabel, mustBuy }: Props) {
+export default function RecipeCard({ recipe, lang, hasMain, cuisineLabel, mustBuy, isFavourite, onToggleFavourite }: Props) {
   const t = T[lang]
   const [image, setImage] = useState<string | null>(null)
   const [imgLoading, setImgLoading] = useState(true)
@@ -59,6 +61,13 @@ export default function RecipeCard({ recipe, lang, hasMain, cuisineLabel, mustBu
 
       <div className={styles.cardTop}>
         <div className={styles.cardTopGlow} />
+        <button
+          className={`${styles.heartBtn} ${isFavourite ? styles.heartOn : styles.heartOff}`}
+          onClick={onToggleFavourite}
+          aria-label={isFavourite ? 'Remove from favourites' : 'Add to favourites'}
+        >
+          {isFavourite ? '♥' : '♡'}
+        </button>
         {hasMain && recipe.mainIngredient && (
           <span className={styles.mainBadge}>⭐ {t.mainBadge}: {recipe.mainIngredient}</span>
         )}
