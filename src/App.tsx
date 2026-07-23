@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import type { Lang, Selections, Recipe, ShoppingAnalysis, Equipment } from './types'
+import type { Lang, Selections, Recipe, ShoppingAnalysis, Equipment, Staple } from './types'
 import { T } from './translations'
 import { fetchRecipes, fetchShoppingAnalysis, translateRecipes } from './api'
-import IngredientInput from './components/IngredientInput'
+import IngredientInput, { DEFAULT_STAPLES } from './components/IngredientInput'
 import FilterPanel from './components/FilterPanel'
 import EquipmentPanel, { ALL_EQUIPMENT } from './components/EquipmentPanel'
 import RecipeCard from './components/RecipeCard'
@@ -13,7 +13,7 @@ export default function App() {
   const [lang, setLang] = useState<Lang>('en')
   const [ingredients, setIngredients] = useState<string[]>([])
   const [mainIndex, setMainIndex] = useState<number | null>(null)
-  const [staples, setStaples] = useState(true)
+  const [staples, setStaples] = useState<Set<Staple>>(DEFAULT_STAPLES)
   const [selections, setSelections] = useState<Selections>({
     cuisine: null, goal: null, time: null, meal: null, skill: null, diet: null,
   })

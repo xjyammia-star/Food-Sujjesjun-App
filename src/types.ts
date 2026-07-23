@@ -57,3 +57,13 @@ export type Equipment =
   | 'grill'
   | 'instantPot'
   | 'toasterOven'
+
+// Pantry staples
+export type Staple =
+  | 'salt' | 'oil' | 'sugar' | 'water' | 'sowSauce'
+  | 'blackPepper' | 'garlic' | 'ginger' | 'onion' | 'flour' | 'cornstarch' | 'vinegar' | 'honey'
+  | 'oysterSauce' | 'darkSoySauce' | 'sesameOil' | 'shaoxingWine' | 'doubanjiang' | 'chickenPowder' | 'starAnise' | 'sichuanPepper'
+  | 'misoSoup' | 'mirin' | 'sake' | 'riceVinegar' | 'dashi' | 'togarashi'
+  | 'fishSauce' | 'coconutMilk' | 'thaiBeanPaste' | 'lemongrass' | 'limejuice'
+  | 'oliveoil' | 'driedOregano' | 'paprika' | 'cumin' | 'butter' | 'cream' | 'bay'
+  | 'garam' | 'turmeric' | 'coriander' | 'cardamom' | 'chiliPowder'

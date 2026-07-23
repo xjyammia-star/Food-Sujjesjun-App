@@ -1,6 +1,7 @@
-import type { Lang, Recipe, Selections, ShoppingAnalysis, Equipment } from './types'
+import type { Lang, Recipe, Selections, ShoppingAnalysis, Equipment, Staple } from './types'
 import { T } from './translations'
 import { ALL_EQUIPMENT, EQUIPMENT_INFO } from './components/EquipmentPanel'
+import { STAPLE_INFO } from './components/IngredientInput'
 
 const GEMINI_MODEL = 'gemini-2.5-flash'
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
@@ -52,20 +53,21 @@ function buildEquipmentClause(availableEquipment: Set<Equipment>, lang: Lang): s
 
 function buildIngredientClause(
   ingredients: string[],
-  staples: boolean,
+  staples: Set<Staple>,
   strict: boolean,
   lang: Lang
 ): string {
-  const stapleList = lang === 'zh'
-    ? '盐、食用油、糖、水、酱油'
-    : 'salt, oil, sugar, water, soy sauce'
+  const isZh = lang === 'zh'
+  const stapleList = staples.size > 0
+    ? [...staples].map(s => isZh ? STAPLE_INFO[s].labelZh : STAPLE_INFO[s].labelEn).join(isZh ? '、' : ', ')
+    : ''
 
   if (strict) {
-    return lang === 'zh'
-      ? `【严格食材限制】用户需要立刻做饭，没有时间购物。食谱必须100%只使用用户提供的食材${staples ? `加上厨房常备（${stapleList}）` : ''}，绝对不能要求购买任何额外食材。"shopping"字段必须为空数组[]。`
-      : `[STRICT INGREDIENTS] The user needs to cook right now and cannot go shopping. Recipes MUST use ONLY the ingredients listed${staples ? ` plus pantry staples (${stapleList})` : ''}. Do not require any extra items to buy. The "shopping" field MUST be an empty array [].`
+    return isZh
+      ? `【严格食材限制】用户需要立刻做饭，没有时间购物。食谱必须100%只使用用户提供的食材${stapleList ? `加上厨房常备（${stapleList}）` : ''}，绝对不能要求购买任何额外食材。"shopping"字段必须为空数组[]。`
+      : `[STRICT INGREDIENTS] The user needs to cook right now and cannot go shopping. Recipes MUST use ONLY the ingredients listed${stapleList ? ` plus pantry staples (${stapleList})` : ''}. Do not require any extra items to buy. The "shopping" field MUST be an empty array [].`
   } else {
-    return lang === 'zh'
+    return isZh
       ? `【食材提示】如果食谱需要用户未列出的食材，请在"shopping"字段列出，并在"substitutions"字段为每个缺少的食材提供替代方案（用用户已有的食材替代），这样用户可以选择购买或直接替代。`
       : `[INGREDIENT GUIDANCE] If a recipe needs ingredients the user hasn't listed, include them in the "shopping" field. For every such missing ingredient, also provide a substitution in the "substitutions" field showing what the user can use instead from what they already have, so they can cook immediately if they choose not to shop.`
   }
@@ -83,7 +85,7 @@ export async function fetchRecipes(
   ingredients: string[],
   mainIngredient: string | null,
   selections: Selections,
-  staples: boolean,
+  staples: Set<Staple>,
   lang: Lang,
   availableEquipment?: Set<Equipment>,
   strictIngredients?: boolean,
@@ -117,7 +119,7 @@ export async function fetchRecipes(
 
 食材：${ingredients.join('、')}
 ${mainIngredient ? `主料（菜肴必须以此为核心）：${mainIngredient}` : ''}
-${staples ? '默认有：盐、食用油、糖、水、酱油' : ''}
+${staples.size > 0 ? `默认有：${[...staples].map(s => STAPLE_INFO[s].labelZh).join('、')}` : ''}
 ${cuisineLabel ? `菜系：${cuisineLabel}` : ''}
 ${goalLabel ? `营养目标：${goalLabel}` : ''}
 ${timeLabel ? `烹饪时间：${timeLabel}` : ''}
@@ -158,7 +160,7 @@ ${equipmentClause}
 
 Ingredients: ${ingredients.join(', ')}
 ${mainIngredient ? `Main ingredient (all dishes MUST center around this): ${mainIngredient}` : ''}
-${staples ? 'Pantry staples available: salt, oil, sugar, water, soy sauce' : ''}
+${staples.size > 0 ? `Pantry staples available: ${[...staples].map(s => STAPLE_INFO[s].labelEn).join(', ')}` : ''}
 ${cuisineLabel ? `Cuisine: ${cuisineLabel}` : ''}
 ${goalLabel ? `Nutritional goal: ${goalLabel}` : ''}
 ${timeLabel ? `Cook time: ${timeLabel}` : ''}
