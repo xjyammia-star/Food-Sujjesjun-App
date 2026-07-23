@@ -1,39 +1,26 @@
-// Neon serverless HTTP — no npm package needed
-// Parses DATABASE_URL and sends queries via Neon's HTTPS endpoint
+import pg from 'pg'
 
-function getNeonConfig() {
-  const url = process.env.DATABASE_URL
-  if (!url) throw new Error('Missing DATABASE_URL')
+const { Pool } = pg
 
-  // postgresql://user:password@host/dbname
-  const match = url.match(/postgresql:\/\/([^:]+):([^@]+)@([^/]+)\/(.+)/)
-  if (!match) throw new Error('Invalid DATABASE_URL format')
-
-  const [, user, password, host, dbname] = match
-  return { user, password, host, dbname: dbname.split('?')[0] }
-}
+// Vercel+Neon injects these automatically when you connect via the integration
+const pool = new Pool({
+  host:     process.env.PGHOST,
+  database: process.env.PGDATABASE || 'neondb',
+  user:     process.env.PGUSER,
+  password: process.env.PGPASSWORD,
+  port:     5432,
+  ssl:      { rejectUnauthorized: false },
+  max:      1, // serverless — keep connections minimal
+})
 
 export async function sql(query, params = []) {
-  const { user, password, host, dbname } = getNeonConfig()
-  const endpoint = `https://${host}/sql`
-
-  const res = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Basic ' + Buffer.from(`${user}:${password}`).toString('base64'),
-      'Neon-Connection-String': process.env.DATABASE_URL,
-    },
-    body: JSON.stringify({ query, params }),
-  })
-
-  if (!res.ok) {
-    const err = await res.text()
-    throw new Error(`Neon query failed: ${err}`)
+  const client = await pool.connect()
+  try {
+    const result = await client.query(query, params)
+    return result.rows
+  } finally {
+    client.release()
   }
-
-  const data = await res.json()
-  return data.rows ?? []
 }
 
 export async function ensureSchema() {
