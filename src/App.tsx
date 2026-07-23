@@ -323,7 +323,6 @@ export default function App() {
                 />
               ))}
             </div>
-            </div>
             <ShoppingPanel
               analysis={shopping}
               loading={loadingShop}
