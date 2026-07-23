@@ -13,13 +13,78 @@ export default function App() {
   const [lang, setLang] = useState<Lang>('en')
   const [ingredients, setIngredients] = useState<string[]>([])
   const [mainIndex, setMainIndex] = useState<number | null>(null)
-  const [staples, setStaples] = useState<Set<Staple>>(DEFAULT_STAPLES)
+
+  // Load staples from localStorage, fall back to defaults
+  const [staples, setStaplesState] = useState<Set<Staple>>(() => {
+    try {
+      const saved = localStorage.getItem('fsa_staples')
+      if (saved) return new Set(JSON.parse(saved) as Staple[])
+    } catch {}
+    return DEFAULT_STAPLES
+  })
+
+  // Load equipment from localStorage, fall back to all equipment
+  const [availableEquipment, setEquipmentState] = useState<Set<Equipment>>(() => {
+    try {
+      const saved = localStorage.getItem('fsa_equipment')
+      if (saved) return new Set(JSON.parse(saved) as Equipment[])
+    } catch {}
+    return new Set(ALL_EQUIPMENT)
+  })
+
+  // Session ID — persists in localStorage so the same user gets their favourites back
+  const sessionId = (() => {
+    let id = localStorage.getItem('fsa_session')
+    if (!id) {
+      id = Math.random().toString(36).slice(2) + Date.now().toString(36)
+      localStorage.setItem('fsa_session', id)
+    }
+    return id
+  })()
+
+  // Load favourites from database on mount
+  const [favourites, setFavouritesState] = useState<Recipe[]>([])
+  useEffect(() => {
+    fetch('/api/favourites', { headers: { 'x-session-id': sessionId } })
+      .then(r => r.json())
+      .then(d => setFavouritesState(d.favourites ?? []))
+      .catch(() => {})
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const [showFavourites, setShowFavourites] = useState(false)
+
+  const toggleFavourite = async (recipe: Recipe) => {
+    // Optimistic update
+    setFavouritesState(prev => {
+      const exists = prev.some(r => r.name === recipe.name)
+      return exists ? prev.filter(r => r.name !== recipe.name) : [...prev, recipe]
+    })
+    // Sync to database
+    try {
+      await fetch('/api/favourites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-session-id': sessionId },
+        body: JSON.stringify({ recipe }),
+      })
+    } catch {}
+  }
+
+  const isFavourite = (recipe: Recipe) => favourites.some(r => r.name === recipe.name)
+
+  const setStaples = (next: Set<Staple>) => {
+    setStaplesState(next)
+    localStorage.setItem('fsa_staples', JSON.stringify([...next]))
+  }
+
+  const setAvailableEquipment = (next: Set<Equipment>) => {
+    setEquipmentState(next)
+    localStorage.setItem('fsa_equipment', JSON.stringify([...next]))
+  }
+
   const [selections, setSelections] = useState<Selections>({
     cuisine: null, goal: null, time: null, meal: null, skill: null, diet: null,
   })
-  const [availableEquipment, setAvailableEquipment] = useState<Set<Equipment>>(
-    new Set(ALL_EQUIPMENT)
-  )
   const [strictIngredients, setStrictIngredients] = useState(false)
   const [tasteNotes, setTasteNotes] = useState('')
 
@@ -119,6 +184,14 @@ export default function App() {
               className={`${styles.langBtn} ${lang === 'zh' ? styles.langActive : ''}`}
               onClick={() => setLang('zh')}
             >中文</button>
+            {favourites.length > 0 && (
+              <button
+                className={`${styles.langBtn} ${showFavourites ? styles.langActive : ''}`}
+                onClick={() => setShowFavourites(v => !v)}
+              >
+                ♥ {favourites.length}
+              </button>
+            )}
           </div>
           <div className={styles.titleEyebrow}>{isZh ? '智能食谱生成器' : 'AI Recipe Generator'}</div>
           <h1 className={styles.title}>{t.title}</h1>
@@ -207,6 +280,27 @@ export default function App() {
 
         {error && <div className={styles.errorBox}>{error}</div>}
 
+        {showFavourites && favourites.length > 0 && (
+          <div className={styles.favouritesPanel}>
+            <div className={styles.favouritesPanelHeader}>
+              <span>♥ {isZh ? '我的收藏' : 'My favourites'}</span>
+              <button className={styles.favouritesClose} onClick={() => setShowFavourites(false)}>✕</button>
+            </div>
+            {favourites.map((recipe, i) => (
+              <RecipeCard
+                key={i}
+                recipe={recipe}
+                lang={lang}
+                hasMain={false}
+                cuisineLabel={cuisineLabel}
+                mustBuy={[]}
+                isFavourite={true}
+                onToggleFavourite={() => toggleFavourite(recipe)}
+              />
+            ))}
+          </div>
+        )}
+
         {recipes.length > 0 && (
           <>
             <div className={styles.results}>
@@ -224,8 +318,11 @@ export default function App() {
                   hasMain={mainIndex !== null}
                   cuisineLabel={cuisineLabel}
                   mustBuy={shopping?.mustBuy ?? []}
+                  isFavourite={isFavourite(recipe)}
+                  onToggleFavourite={() => toggleFavourite(recipe)}
                 />
               ))}
+            </div>
             </div>
             <ShoppingPanel
               analysis={shopping}
