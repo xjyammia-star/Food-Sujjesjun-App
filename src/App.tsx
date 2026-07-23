@@ -7,6 +7,7 @@ import FilterPanel from './components/FilterPanel'
 import EquipmentPanel, { ALL_EQUIPMENT } from './components/EquipmentPanel'
 import RecipeCard from './components/RecipeCard'
 import ShoppingPanel from './components/ShoppingPanel'
+import FavouritesPage from './components/FavouritesPage'
 import styles from './App.module.css'
 
 export default function App() {
@@ -52,7 +53,7 @@ export default function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const [showFavourites, setShowFavourites] = useState(false)
+  const [page, setPage] = useState<'home' | 'favourites'>('home')
 
   const toggleFavourite = async (recipe: Recipe) => {
     // Optimistic update
@@ -172,6 +173,16 @@ export default function App() {
 
   return (
     <div className={styles.page}>
+      {page === 'favourites' && (
+        <FavouritesPage
+          favourites={favourites}
+          lang={lang}
+          onToggleFavourite={toggleFavourite}
+          onBack={() => setPage('home')}
+        />
+      )}
+
+      {page === 'home' && (<>
       <div className={styles.hero}>
         <div className={styles.heroGlow} />
         <div className={styles.heroInner}>
@@ -186,8 +197,8 @@ export default function App() {
             >中文</button>
             {favourites.length > 0 && (
               <button
-                className={`${styles.langBtn} ${showFavourites ? styles.langActive : ''}`}
-                onClick={() => setShowFavourites(v => !v)}
+                className={styles.langBtn}
+                onClick={() => setPage('favourites')}
               >
                 ♥ {favourites.length}
               </button>
@@ -280,27 +291,6 @@ export default function App() {
 
         {error && <div className={styles.errorBox}>{error}</div>}
 
-        {showFavourites && favourites.length > 0 && (
-          <div className={styles.favouritesPanel}>
-            <div className={styles.favouritesPanelHeader}>
-              <span>♥ {isZh ? '我的收藏' : 'My favourites'}</span>
-              <button className={styles.favouritesClose} onClick={() => setShowFavourites(false)}>✕</button>
-            </div>
-            {favourites.map((recipe, i) => (
-              <RecipeCard
-                key={i}
-                recipe={recipe}
-                lang={lang}
-                hasMain={false}
-                cuisineLabel={cuisineLabel}
-                mustBuy={[]}
-                isFavourite={true}
-                onToggleFavourite={() => toggleFavourite(recipe)}
-              />
-            ))}
-          </div>
-        )}
-
         {recipes.length > 0 && (
           <>
             <div className={styles.results}>
@@ -331,6 +321,7 @@ export default function App() {
           </>
         )}
       </div>
+      </>)}
     </div>
   )
 }
