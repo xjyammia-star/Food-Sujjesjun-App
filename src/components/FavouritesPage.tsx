@@ -21,21 +21,10 @@ export default function FavouritesPage({ favourites, lang, onToggleFavourite, on
   const [filterDifficulty, setFilterDifficulty] = useState<string | null>(null)
   const [filterTime, setFilterTime] = useState<string | null>(null)
 
-  // Derive unique filter options from saved recipes
-  const cuisines = useMemo(() => {
-    const s = new Set(favourites.map(r => r.cuisine).filter((c): c is number => c !== undefined && c !== null))
-    return [...s]
-  }, [favourites])
-
-  const mealTypes = useMemo(() => {
-    const s = new Set(favourites.map(r => r.meal).filter((c): c is number => c !== undefined && c !== null))
-    return [...s]
-  }, [favourites])
-
-  const diets = useMemo(() => {
-    const s = new Set(favourites.map(r => r.diet).filter((c): c is number => c !== undefined && c !== null))
-    return [...s]
-  }, [favourites])
+  // Cuisine, meal type, and diet come from fixed option lists — always show all of them
+  const cuisines = T[lang].cuisine.map((_, idx) => idx)
+  const mealTypes = T[lang].meal.map((_, idx) => idx)
+  const diets = T[lang].diet.map((_, idx) => idx)
 
   const difficulties = useMemo(() => {
     const s = new Set(favourites.map(r => r.difficulty).filter(Boolean))
@@ -52,10 +41,10 @@ export default function FavouritesPage({ favourites, lang, onToggleFavourite, on
     return isZh ? '1小时以上' : 'Over 1 hour'
   }
 
-  const timeBuckets = useMemo(() => {
-    const s = new Set(favourites.map(r => timeBucket(r.cookTime)))
-    return [...s]
-  }, [favourites, isZh])
+  // Fixed set of buckets — always shown, regardless of what's currently favourited
+  const timeBuckets = isZh
+    ? ['20分钟内', '30分钟', '1小时', '1小时以上']
+    : ['Under 20 min', '30 min', '1 hour', 'Over 1 hour']
 
   const filtered = useMemo(() => {
     return favourites.filter(r => {
