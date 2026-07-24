@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import type { Recipe, Lang } from '../types'
+import { T } from '../translations'
 import RecipeCard from './RecipeCard'
 import styles from './FavouritesPage.module.css'
 
@@ -14,14 +15,26 @@ export default function FavouritesPage({ favourites, lang, onToggleFavourite, on
   const isZh = lang === 'zh'
 
   const [search, setSearch] = useState('')
-  const [filterCuisine, setFilterCuisine] = useState<string | null>(null)
+  const [filterCuisine, setFilterCuisine] = useState<number | null>(null)
+  const [filterMeal, setFilterMeal] = useState<number | null>(null)
+  const [filterDiet, setFilterDiet] = useState<number | null>(null)
   const [filterDifficulty, setFilterDifficulty] = useState<string | null>(null)
   const [filterTime, setFilterTime] = useState<string | null>(null)
 
   // Derive unique filter options from saved recipes
   const cuisines = useMemo(() => {
-    const all = favourites.map(r => r.mainIngredient).filter(Boolean)
-    return []  // cuisine isn't stored on recipe directly — use difficulty/time instead
+    const s = new Set(favourites.map(r => r.cuisine).filter((c): c is number => c !== undefined && c !== null))
+    return [...s]
+  }, [favourites])
+
+  const mealTypes = useMemo(() => {
+    const s = new Set(favourites.map(r => r.meal).filter((c): c is number => c !== undefined && c !== null))
+    return [...s]
+  }, [favourites])
+
+  const diets = useMemo(() => {
+    const s = new Set(favourites.map(r => r.diet).filter((c): c is number => c !== undefined && c !== null))
+    return [...s]
   }, [favourites])
 
   const difficulties = useMemo(() => {
@@ -49,14 +62,17 @@ export default function FavouritesPage({ favourites, lang, onToggleFavourite, on
       if (search && !r.name.toLowerCase().includes(search.toLowerCase())) return false
       if (filterDifficulty && r.difficulty !== filterDifficulty) return false
       if (filterTime && timeBucket(r.cookTime) !== filterTime) return false
+      if (filterCuisine !== null && r.cuisine !== filterCuisine) return false
+      if (filterMeal !== null && r.meal !== filterMeal) return false
+      if (filterDiet !== null && r.diet !== filterDiet) return false
       return true
     })
-  }, [favourites, search, filterDifficulty, filterTime, isZh])
+  }, [favourites, search, filterDifficulty, filterTime, filterCuisine, filterMeal, filterDiet, isZh])
 
-  const toggleChip = <T extends string>(
-    current: T | null,
-    value: T,
-    set: (v: T | null) => void
+  const toggleChip = <V,>(
+    current: V | null,
+    value: V,
+    set: (v: V | null) => void
   ) => set(current === value ? null : value)
 
   return (
@@ -111,6 +127,60 @@ export default function FavouritesPage({ favourites, lang, onToggleFavourite, on
 
             {/* Filters */}
             <div className={styles.filters}>
+              {/* Cuisine */}
+              {cuisines.length > 1 && (
+                <div className={styles.filterGroup}>
+                  <div className={styles.filterLabel}>
+                    {isZh ? '菜系' : 'Cuisine'}
+                  </div>
+                  <div className={styles.chips}>
+                    {cuisines.map(idx => (
+                      <button
+                        key={idx}
+                        className={`${styles.chip} ${filterCuisine === idx ? styles.chipActive : ''}`}
+                        onClick={() => toggleChip(filterCuisine, idx, setFilterCuisine)}
+                      >{T[lang].cuisine[idx]}</button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Meal type */}
+              {mealTypes.length > 1 && (
+                <div className={styles.filterGroup}>
+                  <div className={styles.filterLabel}>
+                    {isZh ? '餐别' : 'Meal type'}
+                  </div>
+                  <div className={styles.chips}>
+                    {mealTypes.map(idx => (
+                      <button
+                        key={idx}
+                        className={`${styles.chip} ${filterMeal === idx ? styles.chipActive : ''}`}
+                        onClick={() => toggleChip(filterMeal, idx, setFilterMeal)}
+                      >{T[lang].meal[idx]}</button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Diet */}
+              {diets.length > 1 && (
+                <div className={styles.filterGroup}>
+                  <div className={styles.filterLabel}>
+                    {isZh ? '饮食限制' : 'Diet'}
+                  </div>
+                  <div className={styles.chips}>
+                    {diets.map(idx => (
+                      <button
+                        key={idx}
+                        className={`${styles.chip} ${filterDiet === idx ? styles.chipActive : ''}`}
+                        onClick={() => toggleChip(filterDiet, idx, setFilterDiet)}
+                      >{T[lang].diet[idx]}</button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Difficulty */}
               {difficulties.length > 1 && (
                 <div className={styles.filterGroup}>
@@ -149,7 +219,7 @@ export default function FavouritesPage({ favourites, lang, onToggleFavourite, on
             </div>
 
             {/* Results count */}
-            {(search || filterDifficulty || filterTime) && (
+            {(search || filterDifficulty || filterTime || filterCuisine !== null || filterMeal !== null || filterDiet !== null) && (
               <p className={styles.resultCount}>
                 {isZh
                   ? `找到 ${filtered.length} 道食谱`
@@ -158,6 +228,9 @@ export default function FavouritesPage({ favourites, lang, onToggleFavourite, on
                   setSearch('')
                   setFilterDifficulty(null)
                   setFilterTime(null)
+                  setFilterCuisine(null)
+                  setFilterMeal(null)
+                  setFilterDiet(null)
                 }}>
                   {isZh ? '清除筛选' : 'Clear filters'}
                 </button>

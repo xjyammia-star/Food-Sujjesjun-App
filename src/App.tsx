@@ -157,7 +157,14 @@ export default function App() {
         ingredients, mainIng, selections, staples, lang,
         availableEquipment, strictIngredients, tasteNotes.trim()
       )
-      setRecipes(result)
+      const withMeta = result.map(r => ({
+        ...r,
+        cuisine: selections.cuisine,
+        goal: selections.goal,
+        meal: selections.meal,
+        diet: selections.diet,
+      }))
+      setRecipes(withMeta)
 
       setLoadingShop(true)
       fetchShoppingAnalysis(ingredients, result, lang)

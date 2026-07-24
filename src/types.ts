@@ -24,6 +24,10 @@ export interface Recipe {
   servings: number
   imagePrompt?: string
   image?: string
+  cuisine?: number | null
+  goal?: number | null
+  meal?: number | null
+  diet?: number | null
   ingredients: string[]
   steps: string[]
   substitutions: Substitution[]
