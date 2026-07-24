@@ -23,6 +23,7 @@ export interface Recipe {
   difficulty: string
   servings: number
   imagePrompt?: string
+  image?: string
   ingredients: string[]
   steps: string[]
   substitutions: Substitution[]

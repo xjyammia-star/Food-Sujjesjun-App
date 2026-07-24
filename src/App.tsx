@@ -73,6 +73,11 @@ export default function App() {
 
   const isFavourite = (recipe: Recipe) => favourites.some(r => r.name === recipe.name)
 
+  // Store a newly-generated image on its recipe so it travels with the recipe if favourited later
+  const saveImageForRecipe = (recipeName: string, image: string) => {
+    setRecipes(prev => prev.map(r => r.name === recipeName ? { ...r, image } : r))
+  }
+
   const setStaples = (next: Set<Staple>) => {
     setStaplesState(next)
     localStorage.setItem('fsa_staples', JSON.stringify([...next]))
@@ -310,6 +315,7 @@ export default function App() {
                   mustBuy={shopping?.mustBuy ?? []}
                   isFavourite={isFavourite(recipe)}
                   onToggleFavourite={() => toggleFavourite(recipe)}
+                  onImageLoaded={(image) => saveImageForRecipe(recipe.name, image)}
                 />
               ))}
             </div>

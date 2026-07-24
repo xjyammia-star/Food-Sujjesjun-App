@@ -12,12 +12,13 @@ interface Props {
   mustBuy: string[]
   isFavourite: boolean
   onToggleFavourite: () => void
+  onImageLoaded?: (image: string) => void
 }
 
-export default function RecipeCard({ recipe, lang, hasMain, cuisineLabel, mustBuy, isFavourite, onToggleFavourite }: Props) {
+export default function RecipeCard({ recipe, lang, hasMain, cuisineLabel, mustBuy, isFavourite, onToggleFavourite, onImageLoaded }: Props) {
   const t = T[lang]
-  const [image, setImage] = useState<string | null>(null)
-  const [imgLoading, setImgLoading] = useState(true)
+  const [image, setImage] = useState<string | null>(recipe.image ?? null)
+  const [imgLoading, setImgLoading] = useState(!recipe.image)
 
   // Normalise for fuzzy matching — lowercase, strip punctuation
   const normalisedMustBuy = mustBuy.map(s => s.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]/g, ''))
@@ -29,9 +30,15 @@ export default function RecipeCard({ recipe, lang, hasMain, cuisineLabel, mustBu
   }
 
   useEffect(() => {
+    // Already have an image (e.g. this recipe was loaded from favourites) — don't regenerate it
+    if (recipe.image) return
+
     setImgLoading(true)
     fetchDishImage(recipe.name, cuisineLabel || 'international', recipe.imagePrompt)
-      .then(img => setImage(img))
+      .then(img => {
+        setImage(img)
+        if (img) onImageLoaded?.(img)
+      })
       .finally(() => setImgLoading(false))
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // empty array = run once on mount only; language changes must not re-trigger this
