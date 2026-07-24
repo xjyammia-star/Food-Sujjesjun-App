@@ -1,25 +1,24 @@
-// Neon HTTP API — no npm package needed, table created manually in Neon dashboard
+// Neon HTTP API using DATABASE_URL for auth
 
 async function neonSql(query, params = []) {
-  const host     = process.env.PGHOST
-  const user     = process.env.PGUSER
-  const password = process.env.PGPASSWORD
-  const database = process.env.PGDATABASE || 'neondb'
+  const connectionString = process.env.DATABASE_URL
 
-  if (!host || !user || !password) {
-    throw new Error(`Missing Neon env vars — PGHOST:${!!host} PGUSER:${!!user} PGPASSWORD:${!!password}`)
+  if (!connectionString) {
+    throw new Error('Missing DATABASE_URL env var')
   }
 
-  const url = `https://${host}/sql`
-  const credentials = Buffer.from(`${user}:${password}`).toString('base64')
+  // Parse connection string to get host
+  const url = new URL(connectionString)
+  const host = url.hostname
+  const endpoint = `https://${host}/sql`
 
-  const res = await fetch(url, {
+  const res = await fetch(endpoint, {
     method: 'POST',
     headers: {
-      'Content-Type':  'application/json',
-      'Authorization': `Basic ${credentials}`,
+      'Content-Type': 'application/json',
+      'Neon-Connection-String': connectionString,
     },
-    body: JSON.stringify({ query, params, database }),
+    body: JSON.stringify({ query, params }),
   })
 
   if (!res.ok) {
