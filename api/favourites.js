@@ -7,33 +7,31 @@ export default async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end()
 
-  const sessionId = req.headers['x-session-id']
-  if (!sessionId) return res.status(400).json({ error: 'Missing x-session-id header' })
+  const sessionId = req.headers['x-session-id'] || 'shared'
 
   try {
-    // GET — load all favourites for this session
+    // GET — load all favourites, shared across every browser/device
     if (req.method === 'GET') {
       const rows = await sql(
-        `SELECT recipe_data FROM favourites WHERE session_id = $1 ORDER BY created_at ASC`,
-        [sessionId]
+        `SELECT recipe_data FROM favourites ORDER BY created_at ASC`
       )
       return res.status(200).json({ favourites: rows.map(r => r.recipe_data) })
     }
 
-    // POST — toggle favourite
+    // POST — toggle favourite (shared globally, keyed only by recipe name)
     if (req.method === 'POST') {
       const { recipe } = req.body
       if (!recipe?.name) return res.status(400).json({ error: 'Missing recipe' })
 
       const existing = await sql(
-        `SELECT id FROM favourites WHERE session_id = $1 AND recipe_name = $2`,
-        [sessionId, recipe.name]
+        `SELECT id FROM favourites WHERE recipe_name = $1`,
+        [recipe.name]
       )
 
       if (existing.length > 0) {
         await sql(
-          `DELETE FROM favourites WHERE session_id = $1 AND recipe_name = $2`,
-          [sessionId, recipe.name]
+          `DELETE FROM favourites WHERE recipe_name = $1`,
+          [recipe.name]
         )
         return res.status(200).json({ action: 'removed' })
       } else {

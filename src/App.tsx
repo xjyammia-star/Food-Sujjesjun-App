@@ -33,7 +33,8 @@ export default function App() {
     return new Set(ALL_EQUIPMENT)
   })
 
-  // Session ID — persists in localStorage so the same user gets their favourites back
+  // Session ID — kept only because the favourites table requires a value for this column;
+  // favourites themselves are no longer filtered by it (see api/favourites.js)
   const sessionId = (() => {
     let id = localStorage.getItem('fsa_session')
     if (!id) {
@@ -43,7 +44,7 @@ export default function App() {
     return id
   })()
 
-  // Load favourites from database on mount
+  // Load favourites from database on mount — shared across every browser/device
   const [favourites, setFavouritesState] = useState<Recipe[]>([])
   useEffect(() => {
     fetch('/api/favourites', { headers: { 'x-session-id': sessionId } })
