@@ -171,9 +171,9 @@ export default function FavouritesPage({ favourites, lang, onToggleFavourite, on
                   {isZh ? '没有符合条件的食谱' : 'No recipes match your filters'}
                 </div>
               ) : (
-                filtered.map((recipe, i) => (
+                filtered.map((recipe) => (
                   <RecipeCard
-                    key={i}
+                    key={recipe.name}
                     recipe={recipe}
                     lang={lang}
                     hasMain={false}

@@ -305,9 +305,9 @@ export default function App() {
                   ? `根据你的 ${ingredients.length} 种食材生成`
                   : `Generated from your ${ingredients.length} ingredients`}
               </p>
-              {recipes.map((recipe, i) => (
+              {recipes.map((recipe) => (
                 <RecipeCard
-                  key={i}
+                  key={recipe.name}
                   recipe={recipe}
                   lang={lang}
                   hasMain={mainIndex !== null}
