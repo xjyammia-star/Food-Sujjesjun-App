@@ -75,7 +75,7 @@ export default function App() {
 
   // Store a newly-generated image on its recipe so it travels with the recipe if favourited later
   const saveImageForRecipe = (recipeName: string, image: string) => {
-    setRecipes(prev => prev.map(r => r.name === recipeName ? { ...r, image } : r))
+    setRecipesAndRef(prev => prev.map(r => r.name === recipeName ? { ...r, image } : r))
   }
 
   const setStaples = (next: Set<Staple>) => {
@@ -95,6 +95,16 @@ export default function App() {
   const [tasteNotes, setTasteNotes] = useState('')
 
   const [recipes, setRecipes] = useState<Recipe[]>([])
+  const recipesRef = useRef<Recipe[]>([])
+
+  // Keep recipesRef in sync so the lang-switch effect always sees the latest recipes
+  const setRecipesAndRef = (next: Recipe[] | ((prev: Recipe[]) => Recipe[])) => {
+    setRecipes(prev => {
+      const resolved = typeof next === 'function' ? next(prev) : next
+      recipesRef.current = resolved
+      return resolved
+    })
+  }
   const [shopping, setShopping] = useState<ShoppingAnalysis | null>(null)
   const [loading, setLoading] = useState(false)
   const [loadingShop, setLoadingShop] = useState(false)
@@ -108,12 +118,14 @@ export default function App() {
       isFirstRender.current = false
       return
     }
-    if (recipes.length === 0) return
+    // Read from ref — always has current recipes, avoiding stale closure problem
+    const current = recipesRef.current
+    if (current.length === 0) return
 
     setTranslating(true)
-    translateRecipes(recipes, lang)
+    translateRecipes(current, lang)
       .then(translated => {
-        setRecipes(translated)
+        setRecipesAndRef(translated)
         setLoadingShop(true)
         fetchShoppingAnalysis(ingredients, translated, lang)
           .then(s => setShopping(s))
@@ -149,7 +161,7 @@ export default function App() {
     }
     setError(null)
     setLoading(true)
-    setRecipes([])
+    setRecipesAndRef([])
     setShopping(null)
 
     try {
@@ -165,7 +177,7 @@ export default function App() {
         meal: selections.meal,
         diet: selections.diet,
       }))
-      setRecipes(withMeta)
+      setRecipesAndRef(withMeta)
 
       setLoadingShop(true)
       fetchShoppingAnalysis(ingredients, result, lang)
