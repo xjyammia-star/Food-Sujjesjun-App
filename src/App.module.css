@@ -293,3 +293,11 @@
   margin-top: 0.3rem;
   font-family: 'Inter', sans-serif;
 }
+
+.translatingNotice {
+  font-size: 13px;
+  color: #a8a29e;
+  font-family: 'Inter', sans-serif;
+  margin-bottom: 0.5rem;
+  font-style: italic;
+}

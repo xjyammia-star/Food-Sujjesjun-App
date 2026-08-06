@@ -98,6 +98,7 @@ export default function App() {
   const [shopping, setShopping] = useState<ShoppingAnalysis | null>(null)
   const [loading, setLoading] = useState(false)
   const [loadingShop, setLoadingShop] = useState(false)
+  const [translating, setTranslating] = useState(false)   // separate from loading — doesn't affect the generate button
   const [error, setError] = useState<string | null>(null)
 
   // Translate existing recipes when language switches — don't regenerate from scratch
@@ -109,7 +110,7 @@ export default function App() {
     }
     if (recipes.length === 0) return
 
-    setLoading(true)
+    setTranslating(true)
     translateRecipes(recipes, lang)
       .then(translated => {
         setRecipes(translated)
@@ -120,7 +121,7 @@ export default function App() {
           .finally(() => setLoadingShop(false))
       })
       .catch(() => {})
-      .finally(() => setLoading(false))
+      .finally(() => setTranslating(false))
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang])
 
@@ -307,6 +308,11 @@ export default function App() {
           <>
             <div className={styles.results}>
               <p className={styles.resultsHeading}>{isZh ? '为你推荐' : 'Your recipes'}</p>
+              {translating && (
+                <p className={styles.translatingNotice}>
+                  ⏳ {isZh ? '正在翻译食谱…' : 'Translating recipes…'}
+                </p>
+              )}
               <p className={styles.resultsSubheading}>
                 {isZh
                   ? `根据你的 ${ingredients.length} 种食材生成`
