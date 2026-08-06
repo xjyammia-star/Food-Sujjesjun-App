@@ -120,7 +120,7 @@ export default function App() {
           .catch(() => setShopping(null))
           .finally(() => setLoadingShop(false))
       })
-      .catch(() => {})
+      .catch(err => console.error('[translate] failed:', err))
       .finally(() => setTranslating(false))
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang])
