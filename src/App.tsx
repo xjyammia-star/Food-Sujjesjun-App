@@ -6,7 +6,6 @@ import IngredientInput, { DEFAULT_STAPLES } from './components/IngredientInput'
 import FilterPanel from './components/FilterPanel'
 import EquipmentPanel, { ALL_EQUIPMENT } from './components/EquipmentPanel'
 import RecipeCard from './components/RecipeCard'
-import ShoppingPanel from './components/ShoppingPanel'
 import FavouritesPage from './components/FavouritesPage'
 import styles from './App.module.css'
 
@@ -327,11 +326,6 @@ export default function App() {
                 />
               ))}
             </div>
-            <ShoppingPanel
-              analysis={shopping}
-              loading={loadingShop}
-              lang={lang}
-            />
           </>
         )}
       </div>

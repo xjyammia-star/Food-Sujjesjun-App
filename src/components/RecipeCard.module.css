@@ -326,6 +326,30 @@
   font-weight: 700;
 }
 
+/* ── Tips ───────────────────────────────────────────────────────────────────── */
+
+.tipsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tipItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #44403c;
+  line-height: 1.6;
+}
+
+.tipDot {
+  color: #ea580c;
+  font-size: 11px;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
 @media (max-width: 400px) {
   .macroGrid {
     grid-template-columns: repeat(2, 1fr);

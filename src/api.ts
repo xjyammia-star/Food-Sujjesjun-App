@@ -145,6 +145,7 @@ ${equipmentClause}
       "steps": ["步骤1", "步骤2"],
       "substitutions": [{"missing": "缺少食材", "use": "替代品", "reason": "原因"}],
       "shopping": ["还需购买的食材"],
+      "tips": ["针对这道菜的实用烹饪或营养小贴士1", "小贴士2", "小贴士3"],
       "nutrition": {
         "calories": 热量数字,
         "protein": "蛋白质克数，如 '28g'",
@@ -186,6 +187,7 @@ Return ONLY valid JSON (no explanation, no markdown), in this exact format:
       "steps": ["Step 1", "Step 2"],
       "substitutions": [{"missing": "ingredient", "use": "alternative", "reason": "why it works"}],
       "shopping": ["extra items needed"],
+      "tips": ["A practical cooking or nutrition tip specific to this dish", "tip 2", "tip 3"],
       "nutrition": {
         "calories": 350,
         "protein": "28g",
@@ -246,7 +248,7 @@ export async function translateRecipes(recipes: Recipe[], targetLang: Lang): Pro
   const prompt = isZh
     ? `你是一位专业翻译兼厨师。请将以下食谱JSON从英文翻译成中文。
 规则：
-- 翻译所有文字字段：name、mainIngredient、cookTime、difficulty、ingredients数组、steps数组、substitutions对象中的missing/use/reason、shopping数组、nutrition.highlights数组
+- 翻译所有文字字段：name、mainIngredient、cookTime、difficulty、ingredients数组、steps数组、substitutions对象中的missing/use/reason、shopping数组、tips数组、nutrition.highlights数组
 - 保留所有数字字段原样：calories、servings、nutrition.calories/protein/carbs/fat/fiber
 - imagePrompt字段保持英文不变（用于图片生成）
 - 返回与输入完全相同的JSON结构，仅返回JSON，不要加任何说明
@@ -254,7 +256,7 @@ export async function translateRecipes(recipes: Recipe[], targetLang: Lang): Pro
 ${JSON.stringify({ recipes }, null, 2)}`
     : `You are a professional translator and chef. Translate the following recipe JSON from Chinese to English.
 Rules:
-- Translate all text fields: name, mainIngredient, cookTime, difficulty, ingredients array, steps array, substitutions missing/use/reason fields, shopping array, nutrition.highlights array
+- Translate all text fields: name, mainIngredient, cookTime, difficulty, ingredients array, steps array, substitutions missing/use/reason fields, shopping array, tips array, nutrition.highlights array
 - Keep all numeric fields as-is: calories, servings, nutrition.calories/protein/carbs/fat/fiber
 - Keep the imagePrompt field in English unchanged (used for image generation)
 - Return the exact same JSON structure, return ONLY JSON with no explanation

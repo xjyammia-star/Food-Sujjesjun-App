@@ -32,6 +32,7 @@ export interface Recipe {
   steps: string[]
   substitutions: Substitution[]
   shopping: string[]
+  tips: string[]
   nutrition: Nutrition
 }
 

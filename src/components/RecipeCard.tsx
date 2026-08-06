@@ -141,6 +141,21 @@ export default function RecipeCard({ recipe, lang, hasMain, cuisineLabel, mustBu
           </>
         )}
 
+        {recipe.tips && recipe.tips.length > 0 && (
+          <>
+            <div className={styles.divider} />
+            <div className={styles.sectionTitle}>💡 {lang === 'zh' ? '小贴士' : 'Tips'}</div>
+            <div className={styles.tipsList}>
+              {recipe.tips.map((tip, i) => (
+                <div key={i} className={styles.tipItem}>
+                  <span className={styles.tipDot}>✦</span>
+                  <span>{tip}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
         {recipe.nutrition && (
           <>
             <div className={styles.divider} />
