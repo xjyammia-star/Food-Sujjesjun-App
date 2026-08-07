@@ -244,9 +244,10 @@ Analyse and give shopping advice. Return ONLY valid JSON:
 
 export async function translateRecipes(recipes: Recipe[], targetLang: Lang): Promise<Recipe[]> {
   const isZh = targetLang === 'zh'
+  console.log('[translateRecipes] called, recipes count:', recipes.length, 'targetLang:', targetLang)
 
-  // Translate each recipe individually — smaller payloads are more reliable
   const translated = await Promise.all(recipes.map(async (recipe) => {
+    console.log('[translateRecipes] translating:', recipe.name)
     const prompt = isZh
       ? `你是一位专业翻译兼厨师。请将以下单个食谱JSON从英文翻译成中文。
 规则：
@@ -267,9 +268,10 @@ ${JSON.stringify(recipe, null, 2)}`
 
     try {
       const raw = await callGemini(prompt)
+      console.log('[translateRecipes] raw response for', recipe.name, ':', raw.slice(0, 200))
       const clean = raw.replace(/```json|```/g, '').trim()
       const parsed = JSON.parse(clean)
-      // Preserve fields Gemini must never overwrite
+      console.log('[translateRecipes] parsed ok:', parsed.name)
       return {
         ...parsed,
         image: recipe.image,
@@ -279,12 +281,13 @@ ${JSON.stringify(recipe, null, 2)}`
         meal: recipe.meal,
         diet: recipe.diet,
       } as Recipe
-    } catch {
-      // If translation fails for one recipe, return it unchanged rather than losing it
+    } catch (e) {
+      console.error('[translateRecipes] failed for recipe:', recipe.name, e)
       return recipe
     }
   }))
 
+  console.log('[translateRecipes] done, returning', translated.length, 'recipes')
   return translated
 }
 

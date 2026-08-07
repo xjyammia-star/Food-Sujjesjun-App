@@ -114,11 +114,11 @@ export default function App() {
   // Translate existing recipes when language switches — don't regenerate from scratch
   const isFirstRender = useRef(true)
   useEffect(() => {
+    console.log('[lang useEffect] fired, isFirstRender:', isFirstRender.current, 'recipesRef.current.length:', recipesRef.current.length, 'lang:', lang)
     if (isFirstRender.current) {
       isFirstRender.current = false
       return
     }
-    // Read from ref — always has current recipes, avoiding stale closure problem
     const current = recipesRef.current
     if (current.length === 0) return
 
