@@ -242,23 +242,7 @@ Analyse and give shopping advice. Return ONLY valid JSON:
   return JSON.parse(clean) as ShoppingAnalysis
 }
 
-// Translate a single string using Google Translate (free, no API key needed)
-async function googleTranslate(text: string, targetLang: 'zh' | 'en'): Promise<string> {
-  const target = targetLang === 'zh' ? 'zh-CN' : 'en'
-  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${target}&dt=t&q=${encodeURIComponent(text)}`
-  const res = await fetch(url)
-  const data = await res.json()
-  return data[0].map((chunk: [string]) => chunk[0]).join('')
-}
-
-async function translateStrings(arr: string[], targetLang: 'zh' | 'en'): Promise<string[]> {
-  const SEP = ' ||| '
-  const joined = arr.join(SEP)
-  const translated = await googleTranslate(joined, targetLang)
-  return translated.split(SEP).map(s => s.trim())
-}
-
-// Call Gemini with automatic retry if rate-limited (reads the retry delay from the error)
+// Call Gemini with automatic retry if rate-limited
 async function callGeminiWithRetry(prompt: string, maxRetries = 2): Promise<string> {
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
@@ -267,8 +251,8 @@ async function callGeminiWithRetry(prompt: string, maxRetries = 2): Promise<stri
       const msg = e instanceof Error ? e.message : String(e)
       const match = msg.match(/retry in ([\d.]+)s/)
       if (match && attempt < maxRetries) {
-        const waitMs = (parseFloat(match[1]) + 2) * 1000 // add 2s buffer
-        console.log(`[translateRecipes] rate limited, waiting ${Math.round(waitMs / 1000)}s before retry...`)
+        const waitMs = (parseFloat(match[1]) + 2) * 1000
+        console.log(`[callGeminiWithRetry] rate limited, waiting ${Math.round(waitMs / 1000)}s...`)
         await new Promise(resolve => setTimeout(resolve, waitMs))
       } else {
         throw e
@@ -278,49 +262,81 @@ async function callGeminiWithRetry(prompt: string, maxRetries = 2): Promise<stri
   throw new Error('Max retries exceeded')
 }
 
+// ── Google Translate (no API key, no token cost) ─────────────────────────────
+
+async function googleTranslate(text: string, targetLang: 'zh' | 'en'): Promise<string> {
+  if (!text || !text.trim()) return text
+  const target = targetLang === 'zh' ? 'zh-CN' : 'en'
+  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${target}&dt=t&q=${encodeURIComponent(text)}`
+  const res = await fetch(url)
+  const data = await res.json()
+  return data[0].map((chunk: [string]) => chunk[0]).join('')
+}
+
+async function translateStrings(arr: string[], targetLang: 'zh' | 'en'): Promise<string[]> {
+  if (!arr || arr.length === 0) return arr
+  // Join with a rare delimiter to translate in one round-trip
+  const SEP = ' @@@ '
+  const joined = arr.join(SEP)
+  const translated = await googleTranslate(joined, targetLang)
+  const parts = translated.split(SEP).map(s => s.trim())
+  // Fallback: if split count doesn't match, return what we got
+  return parts.length === arr.length ? parts : arr
+}
+
 export async function translateRecipes(recipes: Recipe[], targetLang: Lang): Promise<Recipe[]> {
-  const isZh = targetLang === 'zh'
-  console.log('[translateRecipes] called, recipes count:', recipes.length, 'targetLang:', targetLang)
+  console.log('[translateRecipes] called via Google Translate, count:', recipes.length, 'target:', targetLang)
+  const lang = targetLang === 'zh' ? 'zh' : 'en'
 
-  const prompt = isZh
-    ? `你是一位专业翻译兼厨师。请将以下食谱数组从英文翻译成中文。
-规则：
-- 翻译所有文字字段：name、mainIngredient、cookTime、difficulty、ingredients数组、steps数组、substitutions对象中的missing/use/reason、shopping数组、tips数组、nutrition.highlights数组
-- 保留所有数字字段原样：calories、servings、nutrition.calories/protein/carbs/fat/fiber
-- imagePrompt、image、cuisine、goal、meal、diet字段保持原样不变
-- 返回一个JSON数组，包含所有翻译后的食谱，顺序与输入一致，仅返回JSON数组，不要加任何说明
+  const translated = await Promise.all(recipes.map(async (recipe) => {
+    try {
+      const [name, mainIngredient, cookTime, difficulty] = await Promise.all([
+        googleTranslate(recipe.name, lang),
+        googleTranslate(recipe.mainIngredient, lang),
+        googleTranslate(recipe.cookTime, lang),
+        googleTranslate(recipe.difficulty, lang),
+      ])
 
-${JSON.stringify(recipes, null, 2)}`
-    : `You are a professional translator and chef. Translate the following recipe array from Chinese to English.
-Rules:
-- Translate all text fields: name, mainIngredient, cookTime, difficulty, ingredients array, steps array, substitutions missing/use/reason fields, shopping array, tips array, nutrition.highlights array
-- Keep all numeric fields as-is: calories, servings, nutrition.calories/protein/carbs/fat/fiber
-- Keep imagePrompt, image, cuisine, goal, meal, diet fields exactly as-is
-- Return a JSON array containing all translated recipes in the same order, return ONLY the JSON array, no explanation
+      const [ingredients, steps, shopping, tips, highlights] = await Promise.all([
+        translateStrings(recipe.ingredients, lang),
+        translateStrings(recipe.steps, lang),
+        translateStrings(recipe.shopping ?? [], lang),
+        translateStrings(recipe.tips ?? [], lang),
+        translateStrings(recipe.nutrition?.highlights ?? [], lang),
+      ])
 
-${JSON.stringify(recipes, null, 2)}`
+      const substitutions = await Promise.all(
+        (recipe.substitutions ?? []).map(async (s) => {
+          const [missing, use, reason] = await Promise.all([
+            googleTranslate(s.missing, lang),
+            googleTranslate(s.use, lang),
+            googleTranslate(s.reason, lang),
+          ])
+          return { missing, use, reason }
+        })
+      )
 
-  try {
-    const raw = await callGeminiWithRetry(prompt)
-    console.log('[translateRecipes] raw response (first 300 chars):', raw.slice(0, 300))
-    const clean = raw.replace(/```json|```/g, '').trim()
-    const parsed: Recipe[] = JSON.parse(clean)
+      return {
+        ...recipe,
+        name, mainIngredient, cookTime, difficulty,
+        ingredients, steps, shopping, tips, substitutions,
+        nutrition: { ...recipe.nutrition, highlights },
+        // Always preserve these — never translate them
+        image: recipe.image,
+        imagePrompt: recipe.imagePrompt,
+        cuisine: recipe.cuisine,
+        goal: recipe.goal,
+        meal: recipe.meal,
+        diet: recipe.diet,
+      } as Recipe
+    } catch (e) {
+      console.error('[translateRecipes] failed for:', recipe.name, e)
+      return recipe
+    }
+  }))
 
-    const result = parsed.map((p, i) => ({
-      ...p,
-      image: recipes[i].image,
-      imagePrompt: recipes[i].imagePrompt,
-      cuisine: recipes[i].cuisine,
-      goal: recipes[i].goal,
-      meal: recipes[i].meal,
-      diet: recipes[i].diet,
-    }))
-    console.log('[translateRecipes] done, returning', result.length, 'recipes')
-    return result
-  } catch (e) {
-    console.error('[translateRecipes] failed:', e)
-    return recipes
-  }
+  console.log('[translateRecipes] done')
+  return translated
 }
 
 export async function fetchDishImage(dishName: string, cuisine: string, imagePrompt?: string): Promise<string | null> {
