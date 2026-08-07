@@ -275,13 +275,8 @@ async function googleTranslate(text: string, targetLang: 'zh' | 'en'): Promise<s
 
 async function translateStrings(arr: string[], targetLang: 'zh' | 'en'): Promise<string[]> {
   if (!arr || arr.length === 0) return arr
-  // Join with a rare delimiter to translate in one round-trip
-  const SEP = ' @@@ '
-  const joined = arr.join(SEP)
-  const translated = await googleTranslate(joined, targetLang)
-  const parts = translated.split(SEP).map(s => s.trim())
-  // Fallback: if split count doesn't match, return what we got
-  return parts.length === arr.length ? parts : arr
+  // Translate each string individually — avoids delimiter corruption by Google Translate
+  return Promise.all(arr.map(s => googleTranslate(s, targetLang)))
 }
 
 export async function translateRecipes(recipes: Recipe[], targetLang: Lang): Promise<Recipe[]> {
