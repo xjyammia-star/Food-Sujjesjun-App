@@ -124,9 +124,6 @@ export default function App() {
 
     setTranslating(true)
     const run = async () => {
-      // Small delay so Gemini's rate-limit window has time to partially reset
-      // after the recipe generation call that just happened
-      await new Promise(resolve => setTimeout(resolve, 3000))
       try {
         const translated = await translateRecipes(current, lang)
         setRecipesAndRef(translated)

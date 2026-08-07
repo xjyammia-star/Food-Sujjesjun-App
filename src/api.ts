@@ -242,11 +242,46 @@ Analyse and give shopping advice. Return ONLY valid JSON:
   return JSON.parse(clean) as ShoppingAnalysis
 }
 
+// Translate a single string using Google Translate (free, no API key needed)
+async function googleTranslate(text: string, targetLang: 'zh' | 'en'): Promise<string> {
+  const target = targetLang === 'zh' ? 'zh-CN' : 'en'
+  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${target}&dt=t&q=${encodeURIComponent(text)}`
+  const res = await fetch(url)
+  const data = await res.json()
+  return data[0].map((chunk: [string]) => chunk[0]).join('')
+}
+
+async function translateStrings(arr: string[], targetLang: 'zh' | 'en'): Promise<string[]> {
+  const SEP = ' ||| '
+  const joined = arr.join(SEP)
+  const translated = await googleTranslate(joined, targetLang)
+  return translated.split(SEP).map(s => s.trim())
+}
+
+// Call Gemini with automatic retry if rate-limited (reads the retry delay from the error)
+async function callGeminiWithRetry(prompt: string, maxRetries = 2): Promise<string> {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await callGemini(prompt)
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e)
+      const match = msg.match(/retry in ([\d.]+)s/)
+      if (match && attempt < maxRetries) {
+        const waitMs = (parseFloat(match[1]) + 2) * 1000 // add 2s buffer
+        console.log(`[translateRecipes] rate limited, waiting ${Math.round(waitMs / 1000)}s before retry...`)
+        await new Promise(resolve => setTimeout(resolve, waitMs))
+      } else {
+        throw e
+      }
+    }
+  }
+  throw new Error('Max retries exceeded')
+}
+
 export async function translateRecipes(recipes: Recipe[], targetLang: Lang): Promise<Recipe[]> {
   const isZh = targetLang === 'zh'
   console.log('[translateRecipes] called, recipes count:', recipes.length, 'targetLang:', targetLang)
 
-  // Send all recipes in ONE request — far fewer tokens than sending them one by one
   const prompt = isZh
     ? `你是一位专业翻译兼厨师。请将以下食谱数组从英文翻译成中文。
 规则：
@@ -266,12 +301,11 @@ Rules:
 ${JSON.stringify(recipes, null, 2)}`
 
   try {
-    const raw = await callGemini(prompt)
+    const raw = await callGeminiWithRetry(prompt)
     console.log('[translateRecipes] raw response (first 300 chars):', raw.slice(0, 300))
     const clean = raw.replace(/```json|```/g, '').trim()
     const parsed: Recipe[] = JSON.parse(clean)
 
-    // Re-attach fields Gemini must never overwrite
     const result = parsed.map((p, i) => ({
       ...p,
       image: recipes[i].image,
@@ -285,7 +319,7 @@ ${JSON.stringify(recipes, null, 2)}`
     return result
   } catch (e) {
     console.error('[translateRecipes] failed:', e)
-    return recipes // return originals unchanged if translation fails
+    return recipes
   }
 }
 
