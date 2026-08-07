@@ -123,17 +123,25 @@ export default function App() {
     if (current.length === 0) return
 
     setTranslating(true)
-    translateRecipes(current, lang)
-      .then(translated => {
+    const run = async () => {
+      // Small delay so Gemini's rate-limit window has time to partially reset
+      // after the recipe generation call that just happened
+      await new Promise(resolve => setTimeout(resolve, 3000))
+      try {
+        const translated = await translateRecipes(current, lang)
         setRecipesAndRef(translated)
         setLoadingShop(true)
         fetchShoppingAnalysis(ingredients, translated, lang)
           .then(s => setShopping(s))
           .catch(() => setShopping(null))
           .finally(() => setLoadingShop(false))
-      })
-      .catch(err => console.error('[translate] failed:', err))
-      .finally(() => setTranslating(false))
+      } catch (err) {
+        console.error('[translate] failed:', err)
+      } finally {
+        setTranslating(false)
+      }
+    }
+    run()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang])
 

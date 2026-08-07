@@ -246,49 +246,47 @@ export async function translateRecipes(recipes: Recipe[], targetLang: Lang): Pro
   const isZh = targetLang === 'zh'
   console.log('[translateRecipes] called, recipes count:', recipes.length, 'targetLang:', targetLang)
 
-  const translated = await Promise.all(recipes.map(async (recipe) => {
-    console.log('[translateRecipes] translating:', recipe.name)
-    const prompt = isZh
-      ? `你是一位专业翻译兼厨师。请将以下单个食谱JSON从英文翻译成中文。
+  // Send all recipes in ONE request — far fewer tokens than sending them one by one
+  const prompt = isZh
+    ? `你是一位专业翻译兼厨师。请将以下食谱数组从英文翻译成中文。
 规则：
 - 翻译所有文字字段：name、mainIngredient、cookTime、difficulty、ingredients数组、steps数组、substitutions对象中的missing/use/reason、shopping数组、tips数组、nutrition.highlights数组
 - 保留所有数字字段原样：calories、servings、nutrition.calories/protein/carbs/fat/fiber
 - imagePrompt、image、cuisine、goal、meal、diet字段保持原样不变
-- 只返回单个食谱的JSON对象，不要用数组包裹，不要加任何说明文字
+- 返回一个JSON数组，包含所有翻译后的食谱，顺序与输入一致，仅返回JSON数组，不要加任何说明
 
-${JSON.stringify(recipe, null, 2)}`
-      : `You are a professional translator and chef. Translate the following single recipe JSON from Chinese to English.
+${JSON.stringify(recipes, null, 2)}`
+    : `You are a professional translator and chef. Translate the following recipe array from Chinese to English.
 Rules:
 - Translate all text fields: name, mainIngredient, cookTime, difficulty, ingredients array, steps array, substitutions missing/use/reason fields, shopping array, tips array, nutrition.highlights array
 - Keep all numeric fields as-is: calories, servings, nutrition.calories/protein/carbs/fat/fiber
 - Keep imagePrompt, image, cuisine, goal, meal, diet fields exactly as-is
-- Return ONLY the single recipe JSON object, not wrapped in an array, no explanation
+- Return a JSON array containing all translated recipes in the same order, return ONLY the JSON array, no explanation
 
-${JSON.stringify(recipe, null, 2)}`
+${JSON.stringify(recipes, null, 2)}`
 
-    try {
-      const raw = await callGemini(prompt)
-      console.log('[translateRecipes] raw response for', recipe.name, ':', raw.slice(0, 200))
-      const clean = raw.replace(/```json|```/g, '').trim()
-      const parsed = JSON.parse(clean)
-      console.log('[translateRecipes] parsed ok:', parsed.name)
-      return {
-        ...parsed,
-        image: recipe.image,
-        imagePrompt: recipe.imagePrompt,
-        cuisine: recipe.cuisine,
-        goal: recipe.goal,
-        meal: recipe.meal,
-        diet: recipe.diet,
-      } as Recipe
-    } catch (e) {
-      console.error('[translateRecipes] failed for recipe:', recipe.name, e)
-      return recipe
-    }
-  }))
+  try {
+    const raw = await callGemini(prompt)
+    console.log('[translateRecipes] raw response (first 300 chars):', raw.slice(0, 300))
+    const clean = raw.replace(/```json|```/g, '').trim()
+    const parsed: Recipe[] = JSON.parse(clean)
 
-  console.log('[translateRecipes] done, returning', translated.length, 'recipes')
-  return translated
+    // Re-attach fields Gemini must never overwrite
+    const result = parsed.map((p, i) => ({
+      ...p,
+      image: recipes[i].image,
+      imagePrompt: recipes[i].imagePrompt,
+      cuisine: recipes[i].cuisine,
+      goal: recipes[i].goal,
+      meal: recipes[i].meal,
+      diet: recipes[i].diet,
+    }))
+    console.log('[translateRecipes] done, returning', result.length, 'recipes')
+    return result
+  } catch (e) {
+    console.error('[translateRecipes] failed:', e)
+    return recipes // return originals unchanged if translation fails
+  }
 }
 
 export async function fetchDishImage(dishName: string, cuisine: string, imagePrompt?: string): Promise<string | null> {
